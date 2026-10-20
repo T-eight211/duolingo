@@ -10,16 +10,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useIsClient } from "@/hooks/use-is-client";
 import Image from "next/image";
 import { Button } from "../ui/button";
 
 export const ExitModal = () => {
   const router = useRouter();
-  const [isClient, setIsClient] = useState(false);
+  const isClient = useIsClient();
   const { isOpen, close } = useExitModal();
-
-  useEffect(() => setIsClient(true), []);
 
   if (!isClient) {
     return null;

@@ -1,0 +1,1067 @@
+{
+  "schema_version": "1.1",
+  "arabic_grammar": {
+    "parts_of_speech": {
+      "label": {
+        "english": "Parts of Speech",
+        "arabic": "أقسام الكلام"
+      },
+      "noun": {
+        "label": {
+          "english": "Noun / Nominal",
+          "arabic": "اسم"
+        },
+        "subtypes": {
+          "label": {
+            "english": "Noun Type",
+            "arabic": "نوع الاسم"
+          },
+          "values": {
+            "common_noun": {
+              "english": "Common Noun",
+              "arabic": "اسم عام"
+            },
+            "proper_noun": {
+              "english": "Proper Noun",
+              "arabic": "اسم علم"
+            },
+            "adjective": {
+              "english": "Adjective",
+              "arabic": "صفة"
+            },
+            "pronoun": {
+              "english": "Pronoun",
+              "arabic": "ضمير"
+            },
+            "demonstrative": {
+              "english": "Demonstrative",
+              "arabic": "اسم إشارة"
+            },
+            "relative_pronoun": {
+              "english": "Relative Pronoun",
+              "arabic": "اسم موصول"
+            },
+            "numeral": {
+              "english": "Numeral",
+              "arabic": "عدد"
+            },
+            "active_participle": {
+              "english": "Active Participle",
+              "arabic": "اسم فاعل"
+            },
+            "passive_participle": {
+              "english": "Passive Participle",
+              "arabic": "اسم مفعول"
+            },
+            "verbal_noun": {
+              "english": "Verbal Noun / Masdar",
+              "arabic": "مصدر"
+            },
+            "other": {
+              "english": "Other",
+              "arabic": "أخرى"
+            }
+          }
+        },
+        "gender": {
+          "label": {
+            "english": "Gender",
+            "arabic": "الجنس"
+          },
+          "values": {
+            "masculine": {
+              "english": "Masculine",
+              "arabic": "مذكر"
+            },
+            "feminine": {
+              "english": "Feminine",
+              "arabic": "مؤنث"
+            },
+            "unknown": {
+              "english": "Unknown",
+              "arabic": "غير معروف"
+            }
+          }
+        },
+        "number": {
+          "label": {
+            "english": "Number",
+            "arabic": "العدد"
+          },
+          "values": {
+            "singular": {
+              "english": "Singular",
+              "arabic": "مفرد"
+            },
+            "dual": {
+              "english": "Dual",
+              "arabic": "مثنى"
+            },
+            "plural": {
+              "english": "Plural",
+              "arabic": "جمع"
+            },
+            "unknown": {
+              "english": "Unknown",
+              "arabic": "غير معروف"
+            }
+          }
+        },
+        "plural_type": {
+          "label": {
+            "english": "Plural Type",
+            "arabic": "نوع الجمع"
+          },
+          "values": {
+            "sound_masculine": {
+              "english": "Sound Masculine Plural",
+              "arabic": "جمع مذكر سالم"
+            },
+            "sound_feminine": {
+              "english": "Sound Feminine Plural",
+              "arabic": "جمع مؤنث سالم"
+            },
+            "broken": {
+              "english": "Broken Plural",
+              "arabic": "جمع تكسير"
+            },
+            "other": {
+              "english": "Other",
+              "arabic": "أخرى"
+            },
+            "unknown": {
+              "english": "Unknown",
+              "arabic": "غير معروف"
+            }
+          }
+        },
+        "case": {
+          "label": {
+            "english": "Grammatical Case",
+            "arabic": "الحالة الإعرابية"
+          },
+          "values": {
+            "nominative": {
+              "english": "Nominative",
+              "arabic": "مرفوع"
+            },
+            "accusative": {
+              "english": "Accusative",
+              "arabic": "منصوب"
+            },
+            "genitive": {
+              "english": "Genitive",
+              "arabic": "مجرور"
+            },
+            "indeclinable": {
+              "english": "Indeclinable",
+              "arabic": "مبني"
+            },
+            "unknown": {
+              "english": "Unknown",
+              "arabic": "غير معروف"
+            }
+          }
+        },
+        "definiteness": {
+          "label": {
+            "english": "Definiteness",
+            "arabic": "التعريف والتنكير"
+          },
+          "values": {
+            "definite": {
+              "english": "Definite",
+              "arabic": "معرفة"
+            },
+            "indefinite": {
+              "english": "Indefinite",
+              "arabic": "نكرة"
+            },
+            "construct": {
+              "english": "Construct State / Mudaf",
+              "arabic": "مضاف"
+            },
+            "unknown": {
+              "english": "Unknown",
+              "arabic": "غير معروف"
+            }
+          }
+        },
+        "definiteness_source": {
+          "label": {
+            "english": "Source of Definiteness",
+            "arabic": "سبب التعريف"
+          },
+          "values": {
+            "al": {
+              "english": "Definite Article Al-",
+              "arabic": "أل التعريف"
+            },
+            "proper_noun": {
+              "english": "Proper Noun",
+              "arabic": "العلم"
+            },
+            "possessive_pronoun": {
+              "english": "Possessive Pronoun",
+              "arabic": "ضمير متصل"
+            },
+            "idafa": {
+              "english": "Idafa",
+              "arabic": "الإضافة"
+            },
+            "pronoun": {
+              "english": "Pronoun",
+              "arabic": "الضمير"
+            },
+            "demonstrative": {
+              "english": "Demonstrative",
+              "arabic": "اسم الإشارة"
+            },
+            "unknown": {
+              "english": "Unknown",
+              "arabic": "غير معروف"
+            }
+          }
+        },
+        "idafa_role": {
+          "label": {
+            "english": "Idafa Role",
+            "arabic": "دور الاسم في الإضافة"
+          },
+          "values": {
+            "mudaf": {
+              "english": "Possessed Noun / Mudaf",
+              "arabic": "مضاف"
+            },
+            "mudaf_ilayh": {
+              "english": "Possessor / Mudaf Ilayh",
+              "arabic": "مضاف إليه"
+            },
+            "unknown": {
+              "english": "Unknown",
+              "arabic": "غير معروف"
+            }
+          }
+        },
+        "rationality": {
+          "label": {
+            "english": "Rationality",
+            "arabic": "العاقل وغير العاقل"
+          },
+          "values": {
+            "rational": {
+              "english": "Rational (typically a person)",
+              "arabic": "عاقل"
+            },
+            "non_rational": {
+              "english": "Non-rational",
+              "arabic": "غير عاقل"
+            },
+            "unknown": {
+              "english": "Unknown",
+              "arabic": "غير معروف"
+            }
+          }
+        },
+        "derivation": {
+          "label": {
+            "english": "Derived Form",
+            "arabic": "نوع الاشتقاق"
+          },
+          "values": {
+            "active_participle": {
+              "english": "Active Participle",
+              "arabic": "اسم فاعل"
+            },
+            "passive_participle": {
+              "english": "Passive Participle",
+              "arabic": "اسم مفعول"
+            },
+            "verbal_noun": {
+              "english": "Verbal Noun / Masdar",
+              "arabic": "مصدر"
+            },
+            "unknown": {
+              "english": "Unknown",
+              "arabic": "غير معروف"
+            }
+          }
+        },
+        "possessor": {
+          "label": {
+            "english": "Possessive Pronoun",
+            "arabic": "ضمير الملكية المتصل"
+          },
+          "person": {
+            "label": {
+              "english": "Person",
+              "arabic": "الشخص"
+            },
+            "values": {
+              "1": {
+                "english": "First Person",
+                "arabic": "المتكلم"
+              },
+              "2": {
+                "english": "Second Person",
+                "arabic": "المخاطب"
+              },
+              "3": {
+                "english": "Third Person",
+                "arabic": "الغائب"
+              }
+            }
+          },
+          "gender": {
+            "label": {
+              "english": "Gender",
+              "arabic": "الجنس"
+            },
+            "values": {
+              "masculine": {
+                "english": "Masculine",
+                "arabic": "مذكر"
+              },
+              "feminine": {
+                "english": "Feminine",
+                "arabic": "مؤنث"
+              },
+              "not_distinguished": {
+                "english": "Gender Not Distinguished",
+                "arabic": "غير مميز"
+              }
+            }
+          },
+          "number": {
+            "label": {
+              "english": "Number",
+              "arabic": "العدد"
+            },
+            "values": {
+              "singular": {
+                "english": "Singular",
+                "arabic": "مفرد"
+              },
+              "dual": {
+                "english": "Dual",
+                "arabic": "مثنى"
+              },
+              "plural": {
+                "english": "Plural",
+                "arabic": "جمع"
+              }
+            }
+          }
+        }
+      },
+      "verb": {
+        "label": {
+          "english": "Verb",
+          "arabic": "فعل"
+        },
+        "aspect": {
+          "label": {
+            "english": "Verb Form / Aspect",
+            "arabic": "زمن الفعل وصيغته"
+          },
+          "values": {
+            "perfect": {
+              "english": "Perfect / Past",
+              "arabic": "ماضٍ"
+            },
+            "imperfect": {
+              "english": "Imperfect / Present",
+              "arabic": "مضارع"
+            },
+            "imperative": {
+              "english": "Imperative / Command",
+              "arabic": "أمر"
+            }
+          }
+        },
+        "temporal_meaning": {
+          "label": {
+            "english": "Temporal Meaning",
+            "arabic": "الدلالة الزمنية"
+          },
+          "values": {
+            "past": {
+              "english": "Past",
+              "arabic": "الماضي"
+            },
+            "present": {
+              "english": "Present",
+              "arabic": "الحاضر"
+            },
+            "future": {
+              "english": "Future",
+              "arabic": "المستقبل"
+            },
+            "context_dependent": {
+              "english": "Context Dependent",
+              "arabic": "يحدده السياق"
+            },
+            "unknown": {
+              "english": "Unknown",
+              "arabic": "غير معروف"
+            }
+          }
+        },
+        "future_marker": {
+          "label": {
+            "english": "Future Marker",
+            "arabic": "أداة الاستقبال"
+          },
+          "values": {
+            "sa": {
+              "english": "Sa-",
+              "arabic": "سـ"
+            },
+            "sawfa": {
+              "english": "Sawfa",
+              "arabic": "سوف"
+            }
+          }
+        },
+        "person": {
+          "label": {
+            "english": "Person",
+            "arabic": "الشخص"
+          },
+          "values": {
+            "1": {
+              "english": "First Person",
+              "arabic": "المتكلم"
+            },
+            "2": {
+              "english": "Second Person",
+              "arabic": "المخاطب"
+            },
+            "3": {
+              "english": "Third Person",
+              "arabic": "الغائب"
+            }
+          }
+        },
+        "gender": {
+          "label": {
+            "english": "Gender",
+            "arabic": "الجنس"
+          },
+          "values": {
+            "masculine": {
+              "english": "Masculine",
+              "arabic": "مذكر"
+            },
+            "feminine": {
+              "english": "Feminine",
+              "arabic": "مؤنث"
+            },
+            "not_distinguished": {
+              "english": "Gender Not Distinguished",
+              "arabic": "غير مميز"
+            }
+          }
+        },
+        "number": {
+          "label": {
+            "english": "Number",
+            "arabic": "العدد"
+          },
+          "values": {
+            "singular": {
+              "english": "Singular",
+              "arabic": "مفرد"
+            },
+            "dual": {
+              "english": "Dual",
+              "arabic": "مثنى"
+            },
+            "plural": {
+              "english": "Plural",
+              "arabic": "جمع"
+            }
+          }
+        },
+        "mood": {
+          "label": {
+            "english": "Verb Mood",
+            "arabic": "إعراب الفعل المضارع"
+          },
+          "values": {
+            "indicative": {
+              "english": "Indicative",
+              "arabic": "مرفوع"
+            },
+            "subjunctive": {
+              "english": "Subjunctive",
+              "arabic": "منصوب"
+            },
+            "jussive": {
+              "english": "Jussive",
+              "arabic": "مجزوم"
+            },
+            "unknown": {
+              "english": "Unknown",
+              "arabic": "غير معروف"
+            }
+          }
+        },
+        "energetic_nun": {
+          "label": {
+            "english": "Emphatic Nun",
+            "arabic": "نون التوكيد"
+          },
+          "values": {
+            "heavy": {
+              "english": "Heavy Emphatic Nun",
+              "arabic": "نون التوكيد الثقيلة"
+            },
+            "light": {
+              "english": "Light Emphatic Nun",
+              "arabic": "نون التوكيد الخفيفة"
+            },
+            "unknown": {
+              "english": "Unknown",
+              "arabic": "غير معروف"
+            }
+          }
+        },
+        "voice": {
+          "label": {
+            "english": "Voice",
+            "arabic": "البناء"
+          },
+          "values": {
+            "active": {
+              "english": "Active Voice",
+              "arabic": "مبني للمعلوم"
+            },
+            "passive": {
+              "english": "Passive Voice",
+              "arabic": "مبني للمجهول"
+            },
+            "unknown": {
+              "english": "Unknown",
+              "arabic": "غير معروف"
+            }
+          }
+        },
+        "verb_form": {
+          "label": {
+            "english": "Derived Verb Form",
+            "arabic": "وزن الفعل المزيد"
+          },
+          "values": {
+            "I": {
+              "english": "Form I (Basic)",
+              "arabic": "الفعل الثلاثي المجرد"
+            },
+            "II": {
+              "english": "Form II",
+              "arabic": "الوزن الثاني"
+            },
+            "III": {
+              "english": "Form III",
+              "arabic": "الوزن الثالث"
+            },
+            "IV": {
+              "english": "Form IV",
+              "arabic": "الوزن الرابع"
+            },
+            "V": {
+              "english": "Form V",
+              "arabic": "الوزن الخامس"
+            },
+            "VI": {
+              "english": "Form VI",
+              "arabic": "الوزن السادس"
+            },
+            "VII": {
+              "english": "Form VII",
+              "arabic": "الوزن السابع"
+            },
+            "VIII": {
+              "english": "Form VIII",
+              "arabic": "الوزن الثامن"
+            },
+            "IX": {
+              "english": "Form IX",
+              "arabic": "الوزن التاسع"
+            },
+            "X": {
+              "english": "Form X",
+              "arabic": "الوزن العاشر"
+            },
+            "other": {
+              "english": "Other",
+              "arabic": "أخرى"
+            },
+            "unknown": {
+              "english": "Unknown",
+              "arabic": "غير معروف"
+            }
+          }
+        },
+        "negation": {
+          "label": {
+            "english": "Negation",
+            "arabic": "النفي"
+          },
+          "particle": {
+            "label": {
+              "english": "Negation Particle",
+              "arabic": "أداة النفي"
+            },
+            "values": {
+              "ما": {
+                "english": "Mā (not / did not)",
+                "arabic": "ما"
+              },
+              "لا": {
+                "english": "Lā (not / do not)",
+                "arabic": "لا"
+              },
+              "لم": {
+                "english": "Lam (did not)",
+                "arabic": "لم"
+              },
+              "لن": {
+                "english": "Lan (will not)",
+                "arabic": "لن"
+              },
+              "other": {
+                "english": "Other",
+                "arabic": "أخرى"
+              }
+            }
+          },
+          "type": {
+            "label": {
+              "english": "Negation Type",
+              "arabic": "نوع النفي"
+            },
+            "values": {
+              "normal_negation": {
+                "english": "Normal Negation",
+                "arabic": "نفي"
+              },
+              "prohibition": {
+                "english": "Negative Command / Prohibition",
+                "arabic": "نهي"
+              }
+            }
+          }
+        },
+        "attached_pronouns": {
+          "label": {
+            "english": "Attached Pronouns",
+            "arabic": "الضمائر المتصلة"
+          },
+          "roles": {
+            "label": {
+              "english": "Pronoun Role",
+              "arabic": "وظيفة الضمير"
+            },
+            "values": {
+              "subject": {
+                "english": "Subject",
+                "arabic": "فاعل"
+              },
+              "direct_object": {
+                "english": "Direct Object",
+                "arabic": "مفعول به"
+              }
+            }
+          },
+          "person": {
+            "label": {
+              "english": "Person",
+              "arabic": "الشخص"
+            },
+            "values": {
+              "1": {
+                "english": "First Person",
+                "arabic": "المتكلم"
+              },
+              "2": {
+                "english": "Second Person",
+                "arabic": "المخاطب"
+              },
+              "3": {
+                "english": "Third Person",
+                "arabic": "الغائب"
+              }
+            }
+          },
+          "gender": {
+            "label": {
+              "english": "Gender",
+              "arabic": "الجنس"
+            },
+            "values": {
+              "masculine": {
+                "english": "Masculine",
+                "arabic": "مذكر"
+              },
+              "feminine": {
+                "english": "Feminine",
+                "arabic": "مؤنث"
+              },
+              "not_distinguished": {
+                "english": "Not Distinguished",
+                "arabic": "غير مميز"
+              }
+            }
+          },
+          "number": {
+            "label": {
+              "english": "Number",
+              "arabic": "العدد"
+            },
+            "values": {
+              "singular": {
+                "english": "Singular",
+                "arabic": "مفرد"
+              },
+              "dual": {
+                "english": "Dual",
+                "arabic": "مثنى"
+              },
+              "plural": {
+                "english": "Plural",
+                "arabic": "جمع"
+              }
+            }
+          }
+        },
+        "weakness": {
+          "label": {
+            "english": "Verb Root Type",
+            "arabic": "نوع الفعل من حيث الصحة والاعتلال"
+          },
+          "values": {
+            "sound": {
+              "english": "Sound",
+              "arabic": "صحيح سالم"
+            },
+            "hamzated": {
+              "english": "Hamzated",
+              "arabic": "مهموز"
+            },
+            "doubled": {
+              "english": "Doubled",
+              "arabic": "مضعف"
+            },
+            "assimilated": {
+              "english": "Assimilated",
+              "arabic": "مثال"
+            },
+            "hollow": {
+              "english": "Hollow",
+              "arabic": "أجوف"
+            },
+            "defective": {
+              "english": "Defective",
+              "arabic": "ناقص"
+            },
+            "lafif": {
+              "english": "Doubly Weak / Lafif",
+              "arabic": "لفيف"
+            },
+            "other": {
+              "english": "Other",
+              "arabic": "أخرى"
+            },
+            "unknown": {
+              "english": "Unknown",
+              "arabic": "غير معروف"
+            }
+          }
+        },
+        "transitivity": {
+          "label": {
+            "english": "Transitivity",
+            "arabic": "التعدي واللزوم"
+          },
+          "values": {
+            "transitive": {
+              "english": "Transitive",
+              "arabic": "متعدٍ"
+            },
+            "intransitive": {
+              "english": "Intransitive",
+              "arabic": "لازم"
+            },
+            "both": {
+              "english": "Both",
+              "arabic": "متعدٍ أو لازم حسب الاستعمال"
+            },
+            "unknown": {
+              "english": "Unknown",
+              "arabic": "غير معروف"
+            }
+          }
+        }
+      },
+      "particle": {
+        "label": {
+          "english": "Particle",
+          "arabic": "حرف"
+        },
+        "subtypes": {
+          "label": {
+            "english": "Particle Type",
+            "arabic": "نوع الحرف"
+          },
+          "values": {
+            "preposition": {
+              "english": "Preposition",
+              "arabic": "حرف جر"
+            },
+            "conjunction": {
+              "english": "Conjunction",
+              "arabic": "حرف عطف"
+            },
+            "negation": {
+              "english": "Negation Particle",
+              "arabic": "حرف نفي"
+            },
+            "prohibition": {
+              "english": "Prohibition Particle",
+              "arabic": "حرف نهي"
+            },
+            "interrogative": {
+              "english": "Interrogative Particle",
+              "arabic": "حرف استفهام"
+            },
+            "future": {
+              "english": "Future Particle",
+              "arabic": "حرف استقبال"
+            },
+            "conditional": {
+              "english": "Conditional Particle",
+              "arabic": "أداة شرط"
+            },
+            "vocative": {
+              "english": "Vocative Particle",
+              "arabic": "حرف نداء"
+            },
+            "exception": {
+              "english": "Exception Particle",
+              "arabic": "أداة استثناء"
+            },
+            "emphasis": {
+              "english": "Emphasis Particle",
+              "arabic": "حرف توكيد"
+            },
+            "subjunctive_governor": {
+              "english": "Subjunctive Governor",
+              "arabic": "حرف نصب"
+            },
+            "jussive_governor": {
+              "english": "Jussive Governor",
+              "arabic": "حرف جزم"
+            },
+            "complementizer": {
+              "english": "Complementizer",
+              "arabic": "حرف مصدري"
+            },
+            "definite_article": {
+              "english": "Definite Article",
+              "arabic": "أل التعريف"
+            },
+            "result": {
+              "english": "Result / Consequence Particle",
+              "arabic": "حرف جواب أو سببية"
+            },
+            "other": {
+              "english": "Other",
+              "arabic": "أخرى"
+            }
+          }
+        },
+        "grammatical_effect": {
+          "label": {
+            "english": "Grammatical Effect",
+            "arabic": "الأثر الإعرابي"
+          },
+          "values": {
+            "causes_jussive": {
+              "english": "Causes Jussive",
+              "arabic": "يجزم الفعل المضارع"
+            },
+            "causes_subjunctive": {
+              "english": "Causes Subjunctive",
+              "arabic": "ينصب الفعل المضارع"
+            },
+            "governs_genitive": {
+              "english": "Causes Genitive Case",
+              "arabic": "يجر الاسم"
+            },
+            "marks_future": {
+              "english": "Marks Future",
+              "arabic": "يدل على الاستقبال"
+            },
+            "marks_negation": {
+              "english": "Marks Negation",
+              "arabic": "يدل على النفي"
+            },
+            "marks_prohibition": {
+              "english": "Marks Prohibition",
+              "arabic": "يدل على النهي"
+            },
+            "other": {
+              "english": "Other",
+              "arabic": "أخرى"
+            }
+          }
+        }
+      }
+    },
+    "pronoun_features": {
+      "label": {
+        "english": "Pronoun Features",
+        "arabic": "خصائص الضمير"
+      },
+      "person": {
+        "label": {
+          "english": "Person",
+          "arabic": "الشخص"
+        },
+        "values": {
+          "1": {
+            "english": "First Person",
+            "arabic": "المتكلم"
+          },
+          "2": {
+            "english": "Second Person",
+            "arabic": "المخاطب"
+          },
+          "3": {
+            "english": "Third Person",
+            "arabic": "الغائب"
+          }
+        }
+      },
+      "gender": {
+        "label": {
+          "english": "Gender",
+          "arabic": "الجنس"
+        },
+        "values": {
+          "masculine": {
+            "english": "Masculine",
+            "arabic": "مذكر"
+          },
+          "feminine": {
+            "english": "Feminine",
+            "arabic": "مؤنث"
+          },
+          "not_distinguished": {
+            "english": "Gender Not Distinguished",
+            "arabic": "غير مميز"
+          }
+        }
+      },
+      "number": {
+        "label": {
+          "english": "Number",
+          "arabic": "العدد"
+        },
+        "values": {
+          "singular": {
+            "english": "Singular",
+            "arabic": "مفرد"
+          },
+          "dual": {
+            "english": "Dual",
+            "arabic": "مثنى"
+          },
+          "plural": {
+            "english": "Plural",
+            "arabic": "جمع"
+          }
+        }
+      }
+    },
+    "segmentation": {
+      "label": {
+        "english": "Word Segmentation",
+        "arabic": "تقسيم الكلمة"
+      },
+      "possible_prefix_types": {
+        "label": {
+          "english": "Possible Prefix Types",
+          "arabic": "أنواع السوابق الممكنة"
+        },
+        "values": {
+          "conjunction": {
+            "english": "Conjunction",
+            "arabic": "حرف عطف"
+          },
+          "preposition": {
+            "english": "Preposition",
+            "arabic": "حرف جر"
+          },
+          "definite_article": {
+            "english": "Definite Article",
+            "arabic": "أل التعريف"
+          },
+          "future_particle": {
+            "english": "Future Particle",
+            "arabic": "حرف استقبال"
+          },
+          "interrogative_particle": {
+            "english": "Interrogative Particle",
+            "arabic": "حرف استفهام"
+          },
+          "other": {
+            "english": "Other",
+            "arabic": "أخرى"
+          }
+        }
+      },
+      "possible_suffix_types": {
+        "label": {
+          "english": "Possible Suffix Types",
+          "arabic": "أنواع اللواحق الممكنة"
+        },
+        "values": {
+          "possessive_pronoun": {
+            "english": "Possessive Pronoun",
+            "arabic": "ضمير متصل للملكية"
+          },
+          "object_pronoun": {
+            "english": "Object Pronoun",
+            "arabic": "ضمير متصل في محل مفعول به"
+          },
+          "subject_pronoun": {
+            "english": "Subject Pronoun",
+            "arabic": "ضمير متصل في محل رفع فاعل"
+          },
+          "number_suffix": {
+            "english": "Number Suffix",
+            "arabic": "لاحقة العدد"
+          },
+          "gender_suffix": {
+            "english": "Gender Suffix",
+            "arabic": "لاحقة الجنس"
+          },
+          "case_ending": {
+            "english": "Case Ending",
+            "arabic": "علامة الإعراب"
+          },
+          "other": {
+            "english": "Other",
+            "arabic": "أخرى"
+          }
+        }
+      }
+    },
+    "label": {
+      "english": "Arabic Grammar",
+      "arabic": "النحو والصرف العربي"
+    }
+  }
+}

@@ -2,8 +2,7 @@ import { Button } from "@/components/ui/button";
 import {
   ClerkLoaded,
   ClerkLoading,
-  SignedOut,
-  SignedIn,
+  Show,
   SignUpButton,
   SignInButton,
 } from "@clerk/nextjs";
@@ -13,14 +12,8 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div
-      className="mx-auto flex w-full max-w-[988px] flex-1 flex-col 
-    items-center justify-center gap-2 p-4 lg:flex-row"
-    >
-      <div
-        className="relative mb-8 h-[240px]
-       w-[240px] lg:mb-0 lg:h-[424px] lg:w-[424px]"
-      >
+    <div className="mx-auto flex w-full max-w-[988px] flex-1 flex-col items-center justify-center gap-2 p-4 lg:flex-row">
+      <div className="relative mb-8 h-[240px] w-[240px] lg:mb-0 lg:h-[424px] lg:w-[424px]">
         <Image src="/hero.svg" alt="Hero" fill loading="eager" />
       </div>
       <div className="flex flex-col items-center gap-y-8">
@@ -32,11 +25,11 @@ export default function Home() {
             <Loader className="h-5 w-5 animate-spin text-muted-foreground" />
           </ClerkLoading>
           <ClerkLoaded>
-            <SignedOut>
+            <Show when="signed-out">
               <SignUpButton
                 mode="modal"
-                afterSignInUrl="/learn"
-                afterSignUpUrl="/learn"
+                signInForceRedirectUrl="/learn"
+                forceRedirectUrl="/learn"
               >
                 <Button size="lg" variant="secondary" className="w-full">
                   Get Started
@@ -44,19 +37,19 @@ export default function Home() {
               </SignUpButton>
               <SignInButton
                 mode="modal"
-                afterSignInUrl="/learn"
-                afterSignUpUrl="/learn"
+                forceRedirectUrl="/learn"
+                signUpForceRedirectUrl="/learn"
               >
                 <Button size="lg" variant="primaryOutline" className="w-full">
                   I already have an account
                 </Button>
               </SignInButton>
-            </SignedOut>
-            <SignedIn>
+            </Show>
+            <Show when="signed-in">
               <Button size="lg" variant="secondary" className="w-full" asChild>
                 <Link href="/learn">Continue Learning</Link>
               </Button>
-            </SignedIn>
+            </Show>
           </ClerkLoaded>
         </div>
       </div>

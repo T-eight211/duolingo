@@ -13,7 +13,7 @@ type Props = {
 
 export const SideBarItem = ({ href, iconSrc, label }: Props) => {
   const path = usePathname();
-  const active = path === href;
+  const active = path === href || path.startsWith(`${href}/`);
   return (
     <Button
       variant={active ? "sidebarOutline" : "sidebar"}

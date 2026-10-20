@@ -6,8 +6,10 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  { params: { courseId } }: { params: { courseId: number } },
+  { params }: { params: Promise<{ courseId: string }> },
 ) {
+  const { courseId: rawId } = await params;
+  const courseId = Number(rawId);
   const isAdmin = await getIsAdmin();
 
   if (!isAdmin) {
@@ -22,8 +24,10 @@ export async function GET(
 
 export async function PUT(
   req: Request,
-  { params: { courseId } }: { params: { courseId: number } },
+  { params }: { params: Promise<{ courseId: string }> },
 ) {
+  const { courseId: rawId } = await params;
+  const courseId = Number(rawId);
   const isAdmin = await getIsAdmin();
 
   if (!isAdmin) {
@@ -45,8 +49,10 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  { params: { courseId } }: { params: { courseId: number } },
+  { params }: { params: Promise<{ courseId: string }> },
 ) {
+  const { courseId: rawId } = await params;
+  const courseId = Number(rawId);
   const isAdmin = await getIsAdmin();
 
   if (!isAdmin) {

@@ -11,15 +11,13 @@ import {
 import { usePracticeModal } from "@/store/use-practice-modal";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useIsClient } from "@/hooks/use-is-client";
 import { Button } from "../ui/button";
 
 export const PracticeModal = () => {
   const router = useRouter();
-  const [isClient, setIsClient] = useState(false);
+  const isClient = useIsClient();
   const { isOpen, close } = usePracticeModal();
-
-  useEffect(() => setIsClient(true), []);
 
   if (!isClient) {
     return null;

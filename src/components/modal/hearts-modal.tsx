@@ -10,16 +10,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useIsClient } from "@/hooks/use-is-client";
 import Image from "next/image";
 import { Button } from "../ui/button";
 
 export const HeartsModal = () => {
   const router = useRouter();
-  const [isClient, setIsClient] = useState(false);
+  const isClient = useIsClient();
   const { isOpen, close } = useHeartsModal();
-
-  useEffect(() => setIsClient(true), []);
 
   const onClick = () => {
     close();

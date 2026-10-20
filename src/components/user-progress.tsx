@@ -53,7 +53,7 @@ export const UserProgress = ({
             className="mr-2"
           />
           {hasActiveSubscription ? (
-            <InfinityIcon className="h-4 w-4 stroke-[3]" />
+            <InfinityIcon className="h-4 w-4 stroke-3" />
           ) : (
             hearts
           )}

@@ -5,13 +5,14 @@ import { redirect } from "next/navigation";
 import { Quiz } from "../_components/quiz";
 
 type Props = {
-  params: {
-    lessonId: number;
-  };
+  params: Promise<{
+    lessonId: string;
+  }>;
 };
 
-const LessonIdPage = async ({ params: { lessonId } }: Props) => {
-  const lessonData = getLesson(lessonId);
+const LessonIdPage = async ({ params }: Props) => {
+  const { lessonId } = await params;
+  const lessonData = getLesson(Number(lessonId));
   const userProgressData = getUserProgress();
   const useSubscriptionData = getUserSubscription();
 

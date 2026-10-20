@@ -1,0 +1,598 @@
+{
+  "schema_version": "1.1",
+  "kind": "arabic_grammar_constraints",
+  "companion_to": "grammar-options.json",
+  "conventions": {
+    "no_none_values": true,
+    "missing_field": "Feature is absent, inapplicable, or not supplied; no string sentinel.",
+    "unknown": "Feature applies but evidence is insufficient.",
+    "values": "All selectable values live ONLY in grammar-options.json.",
+    "validation": "Schema validates values; path evaluator validates dependencies. Unknown is never an escape hatch for invalid combinations."
+  },
+  "selection_order": {
+    "verb": [
+      "aspect",
+      "person",
+      "number",
+      "gender",
+      "voice",
+      "mood",
+      "future_marker",
+      "energetic_nun",
+      "negation.type",
+      "negation.particle",
+      "temporal_meaning",
+      "verb_form",
+      "transitivity",
+      "weakness",
+      "attached_pronouns"
+    ],
+    "noun": [
+      "subtype",
+      "number",
+      "plural_type",
+      "gender",
+      "case",
+      "definiteness",
+      "definiteness_source",
+      "idafa_role",
+      "rationality",
+      "derivation",
+      "possessor"
+    ],
+    "particle": [
+      "subtype",
+      "grammatical_effect"
+    ]
+  },
+  "parts_of_speech": {
+    "verb": {
+      "agreement_paths": {
+        "perfect": {
+          "1": {
+            "singular": [
+              "not_distinguished"
+            ],
+            "plural": [
+              "not_distinguished"
+            ]
+          },
+          "2": {
+            "singular": [
+              "masculine",
+              "feminine"
+            ],
+            "dual": [
+              "not_distinguished"
+            ],
+            "plural": [
+              "masculine",
+              "feminine"
+            ]
+          },
+          "3": {
+            "singular": [
+              "masculine",
+              "feminine"
+            ],
+            "dual": [
+              "masculine",
+              "feminine"
+            ],
+            "plural": [
+              "masculine",
+              "feminine"
+            ]
+          }
+        },
+        "imperfect": {
+          "1": {
+            "singular": [
+              "not_distinguished"
+            ],
+            "plural": [
+              "not_distinguished"
+            ]
+          },
+          "2": {
+            "singular": [
+              "masculine",
+              "feminine"
+            ],
+            "dual": [
+              "not_distinguished"
+            ],
+            "plural": [
+              "masculine",
+              "feminine"
+            ]
+          },
+          "3": {
+            "singular": [
+              "masculine",
+              "feminine"
+            ],
+            "dual": [
+              "masculine",
+              "feminine"
+            ],
+            "plural": [
+              "masculine",
+              "feminine"
+            ]
+          }
+        },
+        "imperative": {
+          "2": {
+            "singular": [
+              "masculine",
+              "feminine"
+            ],
+            "dual": [
+              "not_distinguished"
+            ],
+            "plural": [
+              "masculine",
+              "feminine"
+            ]
+          }
+        }
+      },
+      "voice_by_aspect": {
+        "perfect": [
+          "active",
+          "passive",
+          "unknown"
+        ],
+        "imperfect": [
+          "active",
+          "passive",
+          "unknown"
+        ],
+        "imperative": [
+          "active"
+        ]
+      },
+      "mood_by_aspect": {
+        "perfect": [],
+        "imperfect": [
+          "indicative",
+          "subjunctive",
+          "jussive",
+          "unknown"
+        ],
+        "imperative": []
+      },
+      "future_marker_by_aspect": {
+        "perfect": [],
+        "imperfect": [
+          "sa",
+          "sawfa"
+        ],
+        "imperative": []
+      },
+      "energetic_nun_by_aspect": {
+        "perfect": [],
+        "imperfect": [
+          "heavy",
+          "light",
+          "unknown"
+        ],
+        "imperative": [
+          "heavy",
+          "light",
+          "unknown"
+        ]
+      },
+      "temporal_meaning_by_aspect": {
+        "perfect": [
+          "past",
+          "present",
+          "future",
+          "context_dependent",
+          "unknown"
+        ],
+        "imperfect": [
+          "past",
+          "present",
+          "future",
+          "context_dependent",
+          "unknown"
+        ],
+        "imperative": [
+          "present",
+          "future",
+          "context_dependent",
+          "unknown"
+        ]
+      },
+      "negation": {
+        "imperative_forbidden": true,
+        "prohibition": {
+          "aspect": "imperfect",
+          "mood": "jussive",
+          "particle": "لا"
+        },
+        "particle_requirements": {
+          "لن": {
+            "aspect": "imperfect",
+            "mood": "subjunctive",
+            "type": "normal_negation",
+            "temporal_meaning": "future"
+          },
+          "لم": {
+            "aspect": "imperfect",
+            "mood": "jussive",
+            "type": "normal_negation",
+            "temporal_meaning": "past"
+          }
+        },
+        "ordinary_la": {
+          "aspect": "imperfect",
+          "mood": "indicative",
+          "type": "normal_negation"
+        },
+        "notes": [
+          "Only a present negation object means explicit negation/prohibition in the analysed scope.",
+          "Prohibitive لا can be used with third person; not limited to second person.",
+          "Other particles/constructions have exceptions and are not exhaustively modeled."
+        ]
+      },
+      "future_marker_requirements": {
+        "aspect": "imperfect",
+        "mood": "indicative",
+        "temporal_meaning": "future"
+      },
+      "attached_pronouns": {
+        "cardinality": "array",
+        "role_paths": {
+          "subject": {
+            "1": {
+              "singular": [
+                "not_distinguished"
+              ],
+              "plural": [
+                "not_distinguished"
+              ]
+            },
+            "2": {
+              "singular": [
+                "masculine",
+                "feminine"
+              ],
+              "dual": [
+                "not_distinguished"
+              ],
+              "plural": [
+                "masculine",
+                "feminine"
+              ]
+            },
+            "3": {
+              "singular": [
+                "masculine",
+                "feminine"
+              ],
+              "dual": [
+                "not_distinguished"
+              ],
+              "plural": [
+                "masculine",
+                "feminine"
+              ]
+            }
+          },
+          "direct_object": {
+            "1": {
+              "singular": [
+                "not_distinguished"
+              ],
+              "plural": [
+                "not_distinguished"
+              ]
+            },
+            "2": {
+              "singular": [
+                "masculine",
+                "feminine"
+              ],
+              "dual": [
+                "not_distinguished"
+              ],
+              "plural": [
+                "masculine",
+                "feminine"
+              ]
+            },
+            "3": {
+              "singular": [
+                "masculine",
+                "feminine"
+              ],
+              "dual": [
+                "not_distinguished"
+              ],
+              "plural": [
+                "masculine",
+                "feminine"
+              ]
+            }
+          }
+        },
+        "notes": "Subject clitic and verb subject features are separate. Not all agreement markers are standalone clitics."
+      }
+    },
+    "noun": {
+      "plural_type_only_number": "plural",
+      "subtype_requires": {
+        "proper_noun": {
+          "definiteness": "definite"
+        },
+        "pronoun": {
+          "definiteness": "definite",
+          "definiteness_source": "pronoun"
+        },
+        "demonstrative": {
+          "definiteness": "definite",
+          "definiteness_source": "demonstrative"
+        },
+        "relative_pronoun": {
+          "definiteness": "definite"
+        },
+        "active_participle": {
+          "derivation": "active_participle"
+        },
+        "passive_participle": {
+          "derivation": "passive_participle"
+        },
+        "verbal_noun": {
+          "derivation": "verbal_noun"
+        }
+      },
+      "source_requires": {
+        "al": {
+          "definiteness": "definite"
+        },
+        "proper_noun": {
+          "definiteness": "definite"
+        },
+        "pronoun": {
+          "definiteness": "definite"
+        },
+        "demonstrative": {
+          "definiteness": "definite"
+        },
+        "possessive_pronoun": {
+          "definiteness": "definite",
+          "idafa_role": "mudaf"
+        }
+      },
+      "construct_requires": {
+        "idafa_role": "mudaf"
+      },
+      "possessor_agreement_paths": {
+        "1": {
+          "singular": [
+            "not_distinguished"
+          ],
+          "plural": [
+            "not_distinguished"
+          ]
+        },
+        "2": {
+          "singular": [
+            "masculine",
+            "feminine"
+          ],
+          "dual": [
+            "not_distinguished"
+          ],
+          "plural": [
+            "masculine",
+            "feminine"
+          ]
+        },
+        "3": {
+          "singular": [
+            "masculine",
+            "feminine"
+          ],
+          "dual": [
+            "not_distinguished"
+          ],
+          "plural": [
+            "masculine",
+            "feminine"
+          ]
+        }
+      },
+      "notes": [
+        "Construct is a grammatical state, not a type of definiteness; preserved for compatibility with options v1.1.",
+        "Indeclinable concerns inflection; syntactic case positions may still exist.",
+        "A mudaf need not be definite."
+      ]
+    },
+    "particle": {
+      "allowed_effects_by_subtype": {
+        "preposition": [
+          "governs_genitive",
+          "other"
+        ],
+        "conjunction": [
+          "causes_subjunctive",
+          "causes_jussive",
+          "other"
+        ],
+        "negation": [
+          "marks_negation",
+          "causes_subjunctive",
+          "causes_jussive",
+          "other"
+        ],
+        "prohibition": [
+          "marks_prohibition",
+          "causes_jussive"
+        ],
+        "interrogative": [
+          "other"
+        ],
+        "future": [
+          "marks_future"
+        ],
+        "conditional": [
+          "causes_jussive",
+          "other"
+        ],
+        "vocative": [
+          "other"
+        ],
+        "exception": [
+          "other"
+        ],
+        "emphasis": [
+          "other"
+        ],
+        "subjunctive_governor": [
+          "causes_subjunctive"
+        ],
+        "jussive_governor": [
+          "causes_jussive"
+        ],
+        "complementizer": [
+          "causes_subjunctive",
+          "other"
+        ],
+        "definite_article": [
+          "other"
+        ],
+        "result": [
+          "causes_subjunctive",
+          "other"
+        ],
+        "other": [
+          "governs_genitive",
+          "causes_subjunctive",
+          "causes_jussive",
+          "marks_future",
+          "marks_negation",
+          "marks_prohibition",
+          "other"
+        ]
+      },
+      "notes": [
+        "Effect is an array because one particle may mark negation and govern subjunctive/jussive.",
+        "Omit grammatical_effect when a particle has no effect in the available effect vocabulary."
+      ]
+    }
+  },
+  "segmentation_rules": {
+    "possible_prefix_types": {
+      "conjunction": [
+        "noun",
+        "verb",
+        "particle"
+      ],
+      "preposition": [
+        "noun",
+        "particle"
+      ],
+      "definite_article": [
+        "noun"
+      ],
+      "future_particle": [
+        "verb:imperfect"
+      ],
+      "interrogative_particle": [
+        "noun",
+        "verb",
+        "particle"
+      ],
+      "other": [
+        "noun",
+        "verb",
+        "particle"
+      ]
+    },
+    "possible_suffix_types": {
+      "possessive_pronoun": [
+        "noun"
+      ],
+      "object_pronoun": [
+        "verb"
+      ],
+      "subject_pronoun": [
+        "verb"
+      ],
+      "number_suffix": [
+        "noun",
+        "verb"
+      ],
+      "gender_suffix": [
+        "noun",
+        "verb"
+      ],
+      "case_ending": [
+        "noun",
+        "verb:imperfect"
+      ],
+      "other": [
+        "noun",
+        "verb",
+        "particle"
+      ]
+    },
+    "note": "Morphological prefix/suffix eligibility only; phrase-level clitics and constructions need separate segmentation."
+  },
+  "examples": [
+    {
+      "part_of_speech": "verb",
+      "aspect": "imperative",
+      "person": 2,
+      "number": "singular",
+      "gender": "masculine",
+      "voice": "active",
+      "surface": "اُكْتُبْ"
+    },
+    {
+      "part_of_speech": "verb",
+      "aspect": "imperfect",
+      "person": 2,
+      "number": "singular",
+      "gender": "masculine",
+      "voice": "active",
+      "mood": "jussive",
+      "negation": {
+        "type": "prohibition",
+        "particle": "لا"
+      },
+      "surface": "لَا تَكْتُبْ"
+    },
+    {
+      "part_of_speech": "verb",
+      "aspect": "imperfect",
+      "person": 3,
+      "number": "singular",
+      "gender": "masculine",
+      "voice": "passive",
+      "mood": "subjunctive",
+      "negation": {
+        "type": "normal_negation",
+        "particle": "لن"
+      },
+      "temporal_meaning": "future",
+      "surface": "لَنْ يُكْتَبَ"
+    },
+    {
+      "part_of_speech": "verb",
+      "aspect": "imperfect",
+      "person": 3,
+      "number": "singular",
+      "gender": "masculine",
+      "voice": "active",
+      "mood": "indicative",
+      "future_marker": "sa",
+      "temporal_meaning": "future",
+      "surface": "سَيَكْتُبُ"
+    }
+  ]
+}

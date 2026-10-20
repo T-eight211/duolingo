@@ -1,0 +1,5 @@
+simulation: vocabulary-extraction
+routing: path
+mocks:
+  - routeKey: gateway
+    path: ../mocks/vocabulary-gateway/config.yaml

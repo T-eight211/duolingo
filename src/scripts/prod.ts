@@ -1,12 +1,7 @@
 import "dotenv/config";
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon } from "@neondatabase/serverless";
-
+import db, { client } from "../db/drizzle";
 import * as schema from "../db/schema";
-
-const sql = neon(process.env.DATABASE_URL!);
-// @ts-ignore
-const db = drizzle(sql, { schema });
+import { seedArabicCourse } from "../db/seed-arabic";
 
 const main = async () => {
   try {
@@ -325,6 +320,7 @@ const main = async () => {
         }
       }
     }
+    await seedArabicCourse();
     console.log("Database seeded successfully");
   } catch (error) {
     console.error(error);
@@ -332,4 +328,10 @@ const main = async () => {
   }
 };
 
-main();
+main()
+  .catch(() => {
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await client.end();
+  });

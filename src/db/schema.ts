@@ -1,13 +1,22 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   boolean,
+  check,
+  foreignKey,
+  index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   serial,
   text,
   timestamp,
+  unique,
+  uuid,
 } from "drizzle-orm/pg-core";
+import type { VocabularyEntry } from "@/lib/vocabulary/schema";
+import type { ArabicGrammar, PartOfSpeech } from "@/lib/grammar/types";
 
 export const admin = pgTable("admin", {
   id: serial("id").primaryKey(),
@@ -147,3 +156,103 @@ export const userSubscription = pgTable("user_subscription", {
   stripePriceId: text("stripe_price_id").notNull(),
   stripeCurrentPeriodEnd: timestamp("stripe_current_period_end").notNull(),
 });
+
+// Clerk authenticates these records through the server. RLS has no public
+// policies, and the additive migration revokes Supabase Data API grants.
+export const userVocabulary = pgTable(
+  "user_vocabulary",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => userProgress.userId, { onDelete: "cascade" }),
+    courseId: integer("course_id")
+      .notNull()
+      .references(() => courses.id, { onDelete: "cascade" }),
+    kind: text("kind").$type<VocabularyEntry["kind"]>().notNull(),
+    arabic: text("arabic").notNull(),
+    arabicDiacritized: text("arabic_diacritized").notNull(),
+    english: text("english").notNull(),
+    originalArabic: text("original_arabic"),
+    originalEnglish: text("original_english"),
+    corrections: jsonb("corrections")
+      .$type<VocabularyEntry["corrections"]>()
+      .notNull()
+      .default([]),
+    needsReview: boolean("needs_review").notNull().default(false),
+    reviewReason: text("review_reason"),
+    partOfSpeech: text("part_of_speech").$type<PartOfSpeech>(),
+    grammar: jsonb("grammar").$type<ArabicGrammar | null>(),
+    // SHA-256 of the normalized bilingual pair keeps sentence indexes bounded.
+    normalizedKey: text("normalized_key").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    unique("user_vocabulary_pair_unique").on(
+      table.userId,
+      table.courseId,
+      table.kind,
+      table.normalizedKey,
+    ),
+    unique("user_vocabulary_owner_id_unique").on(
+      table.id,
+      table.userId,
+      table.courseId,
+    ),
+    index("user_vocabulary_course_idx").on(table.courseId),
+    index("user_vocabulary_pos_idx").on(table.courseId, table.partOfSpeech),
+    check(
+      "user_vocabulary_kind_check",
+      sql`${table.kind} IN ('word', 'phrase', 'sentence')`,
+    ),
+    check(
+      "user_vocabulary_text_check",
+      sql`length(trim(${table.arabic})) > 0 AND length(trim(${table.arabicDiacritized})) > 0 AND length(trim(${table.english})) > 0`,
+    ),
+  ],
+).enableRLS();
+
+export const userVocabularyLinks = pgTable(
+  "user_vocabulary_links",
+  {
+    userId: text("user_id").notNull(),
+    courseId: integer("course_id").notNull(),
+    sourceId: uuid("source_id").notNull(),
+    wordId: uuid("word_id").notNull(),
+  },
+  (table) => [
+    primaryKey({
+      name: "user_vocabulary_links_pk",
+      columns: [table.userId, table.courseId, table.sourceId, table.wordId],
+    }),
+    foreignKey({
+      name: "user_vocabulary_links_source_fk",
+      columns: [table.sourceId, table.userId, table.courseId],
+      foreignColumns: [
+        userVocabulary.id,
+        userVocabulary.userId,
+        userVocabulary.courseId,
+      ],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "user_vocabulary_links_word_fk",
+      columns: [table.wordId, table.userId, table.courseId],
+      foreignColumns: [
+        userVocabulary.id,
+        userVocabulary.userId,
+        userVocabulary.courseId,
+      ],
+    }).onDelete("cascade"),
+    index("user_vocabulary_links_word_idx").on(
+      table.userId,
+      table.courseId,
+      table.wordId,
+    ),
+    check(
+      "user_vocabulary_links_distinct_check",
+      sql`${table.sourceId} <> ${table.wordId}`,
+    ),
+  ],
+).enableRLS();

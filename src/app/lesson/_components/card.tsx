@@ -33,9 +33,9 @@ export const Card = ({
   const [audio, _, controls] = useAudio({ src: audioSrc || "" });
   const handleClick = useCallback(() => {
     if (disabled) return;
-    controls.play();
+    if (audioSrc) controls.play();
     onClick();
-  }, [disabled, onClick, controls]);
+  }, [disabled, onClick, controls, audioSrc]);
 
   useKey(shortcut, handleClick, {}, [handleClick]);
 
@@ -56,7 +56,7 @@ export const Card = ({
         type === "ASSIST" && "w-full lg:p-3",
       )}
     >
-      {audio}
+      {audioSrc && audio}
       {imageSrc && (
         <div className="relative mb-4 aspect-square max-h-[80px] w-full lg:max-h-[150px]">
           <Image src={imageSrc} fill alt={text} />
@@ -70,6 +70,8 @@ export const Card = ({
       >
         {type === "ASSIST" && <div />}
         <p
+          dir="auto"
+          lang={/\p{Script=Arabic}/u.test(text) ? "ar" : undefined}
           className={cn(
             "text-sm text-neutral-600 lg:text-base",
             selected && "text-sky-500",

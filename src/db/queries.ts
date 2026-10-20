@@ -1,6 +1,6 @@
 import { cache } from "react";
 
-import { auth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import db from "./drizzle";
 import {
@@ -77,9 +77,20 @@ export const getUnits = cache(async () => {
 });
 
 export const getCourses = cache(async () => {
-  const data = await db.query.courses.findMany();
+  const data = await db.query.courses.findMany({
+    with: {
+      units: {
+        orderBy: (units, { asc }) => [asc(units.order)],
+        limit: 1,
+        with: { lessons: { columns: { id: true }, limit: 1 } },
+      },
+    },
+  });
 
-  return data;
+  // Match the course-selection guard: the first unit must contain a lesson.
+  return data
+    .filter((course) => course.units[0]?.lessons.length)
+    .map(({ units, ...course }) => course);
 });
 
 export const getCourseById = cache(async (courseId: number) => {
@@ -266,7 +277,7 @@ export const getTopTenUsers = cache(async () => {
 });
 
 export const getIsAdmin = cache(async () => {
-  const { userId } = auth();
+  const { userId } = await auth();
 
   if (!userId) {
     return false;
