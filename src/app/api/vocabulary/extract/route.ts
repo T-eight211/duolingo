@@ -12,6 +12,7 @@ import {
   VocabularyUploadError,
 } from "@/lib/vocabulary/upload";
 import { analyzeVocabularyGrammar } from "@/lib/grammar/analyze";
+import { generateVocabularyAudio } from "@/lib/audio/polly";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -53,6 +54,13 @@ export async function POST(request: Request) {
       });
     } catch (grammarErr) {
       console.error("Vocabulary grammar analysis failed:", grammarErr);
+    }
+
+    // Step 5: Synthesize Arabic audio for extracted words with AWS Polly & upload to Supabase S3
+    try {
+      result.entries = await generateVocabularyAudio(result.entries);
+    } catch (audioErr) {
+      console.error("Vocabulary audio generation failed:", audioErr);
     }
 
     return NextResponse.json(result, {

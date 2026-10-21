@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { FeedWrapper } from "@/components/feed-wrapper";
+import { Header } from "@/app/(main)/learn/_components/header";
 import { Promo } from "@/components/promo";
 import { Quests } from "@/components/quests";
 import { StickyWrapper } from "@/components/sticky-wrapper";
-import { Button } from "@/components/ui/button";
 import { UserProgress } from "@/components/user-progress";
 import { getUserProgress, getUserSubscription } from "@/db/queries";
 import { WordList } from "./word-list";
 import { arabicCourse } from "@/lib/arabic-course";
 import { getVocabulary } from "@/db/vocabulary";
 import { VocabularyUpload } from "./vocabulary-upload";
+import { StartPracticeButton } from "./start-practice-button";
 
 export const metadata: Metadata = {
   title: "Lingo | Words",
@@ -29,6 +29,7 @@ export default async function WordsPage() {
   if (userProgress.activeCourse.title !== arabicCourse.title)
     redirect("/practice");
   const isPro = !!userSubscription?.isActive;
+  const userWords = vocabulary.filter((entry) => entry.kind === "word");
 
   return (
     <div className="flex flex-row-reverse gap-[48px] px-6">
@@ -43,15 +44,7 @@ export default async function WordsPage() {
         <Quests points={userProgress.points} />
       </StickyWrapper>
       <FeedWrapper>
-        <Button
-          variant="ghost"
-          className="mb-6 gap-2 px-0 hover:bg-transparent hover:text-sky-500"
-          asChild
-        >
-          <Link href="/practice">
-            <ArrowLeft className="h-5 w-5" aria-hidden="true" /> Practice
-          </Link>
-        </Button>
+        <Header title="Practice" href="/practice" />
         <header>
           <div className="flex items-center justify-between gap-4">
             <div>
@@ -75,9 +68,7 @@ export default async function WordsPage() {
             </div>
           </div>
           <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
-            <Button asChild variant="super" size="lg" className="w-full sm:flex-1">
-              <Link href="/practice/words/match">Practice matching</Link>
-            </Button>
+            <StartPracticeButton wordCount={userWords.length} />
             <div className="w-full sm:flex-1">
               <VocabularyUpload existingEntries={vocabulary} />
             </div>

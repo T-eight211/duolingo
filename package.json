@@ -20,6 +20,9 @@
     "test:db": "node --conditions=react-server --import tsx --test tests/vocabulary/database.integration.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-polly": "^3.1153.0",
+    "@aws-sdk/client-s3": "^3.1153.0",
+    "@aws-sdk/s3-request-presigner": "^3.1153.0",
     "@base-ui/react": "^1.9.0",
     "@clerk/nextjs": "7.9.17",
     "@radix-ui/react-avatar": "^1.0.4",
@@ -59,7 +62,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
-    "@types/node": "^20",
+    "@types/node": "^22.20.5",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "drizzle-kit": "0.31.11",

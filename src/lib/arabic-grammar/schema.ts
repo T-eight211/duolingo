@@ -59,7 +59,7 @@ const NounPossessorSchema = PronounFeaturesSchema
 
 export const NounAiSchema = z.strictObject({
   part_of_speech: z.literal("noun"),
-  subtype: z.enum(o.parts_of_speech.noun.subtypes)
+  subtype: z.enum(o.parts_of_speech.noun.subtypes).optional()
     .meta({ description: "Classify the nominal word, including adjective, pronoun, active/passive participle or masdar when appropriate.", ui: { order: 1 }, developerNote: "Subtype describes the grammatical class; participle/masdar derivation can be shown separately." }),
   gender: z.enum(o.parts_of_speech.noun.gender).optional()
     .describe("Grammatical gender of the noun. 'unknown' only if ambiguous, not as a substitute for analysis."),
@@ -101,7 +101,7 @@ const NegationSchema = z.strictObject({
 
 export const VerbAiSchema = z.strictObject({
   part_of_speech: z.literal("verb"),
-  aspect: z.enum(o.parts_of_speech.verb.aspect)
+  aspect: z.enum(o.parts_of_speech.verb.aspect).optional()
     .meta({ description: "Morphological verb form: perfect ماضٍ, imperfect مضارع, imperative أمر. This is not the same as temporal meaning.", ui: { order: 1, labelAr: "زمن الفعل وصيغته" }, developerNote: "Primary selector: drives all other verb field applicability." }),
   person: person.optional().describe("Who the verb is conjugated for. Morphological imperatives take only person 2."),
   number: z.enum(o.parts_of_speech.verb.number).optional()
@@ -132,7 +132,7 @@ export const VerbAiSchema = z.strictObject({
 
 export const ParticleAiSchema = z.strictObject({
   part_of_speech: z.literal("particle"),
-  subtype: z.enum(o.parts_of_speech.particle.subtypes)
+  subtype: z.enum(o.parts_of_speech.particle.subtypes).optional()
     .describe("The grammatical category of this particle, e.g. preposition, negation, prohibition, conjunction, subjunctive governor."),
   grammatical_effect: z.array(z.enum(o.parts_of_speech.particle.grammatical_effect)).optional()
     .meta({ description: "Zero or more observed grammatical effects. Multiple effects may coexist, e.g. لن marks negation and causes subjunctive. Omit if none of the listed effects apply.", ui: { multiple: true }, developerNote: "Plural intentionally: a particle can both mark negation and govern a mood. No 'none' choice." }),

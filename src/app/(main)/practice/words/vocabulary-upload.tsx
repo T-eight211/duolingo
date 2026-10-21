@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Plus } from "lucide-react";
+import { Check, Plus, ScanLine } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import {
+  createEmptyVocabularyEntry,
   extractionResultSchema,
   type VocabularyEntry,
 } from "@/lib/vocabulary/schema";
@@ -19,6 +19,7 @@ export function VocabularyUpload({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const requestRef = useRef<AbortController | null>(null);
   const [extracting, setExtracting] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [entries, setEntries] = useState<VocabularyEntry[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -29,11 +30,11 @@ export function VocabularyUpload({
 
   async function upload(file?: File) {
     if (!file || requestRef.current) return;
-    if (file.size === 0 || file.size > 4 * 1024 * 1024) {
+    if (file.size === 0 || file.size > 20 * 1024 * 1024) {
       const message =
         file.size === 0
           ? "This file is empty. Choose an image or PDF."
-          : "Choose a file smaller than 4 MB.";
+          : "Choose a file smaller than 20 MB.";
       setError(message);
       toast.error(message);
       return;
@@ -41,7 +42,17 @@ export function VocabularyUpload({
     const controller = new AbortController();
     requestRef.current = controller;
     setExtracting(true);
+    setProgress(15);
     setError(null);
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev < 40) return prev + 6;
+        if (prev < 70) return prev + 3;
+        if (prev < 85) return prev + 1.5;
+        if (prev < 95) return prev + 0.5;
+        return prev;
+      });
+    }, 200);
     const timeout = setTimeout(() => controller.abort("timeout"), 110_000);
     try {
       const form = new FormData();
@@ -60,7 +71,7 @@ export function VocabularyUpload({
           typeof body.error === "string"
             ? body.error
             : response.status === 413
-              ? "Choose a file smaller than 4 MB."
+              ? "Choose a file smaller than 20 MB."
               : "The upload could not be processed. Please try again.";
         throw new Error(message);
       }
@@ -70,6 +81,9 @@ export function VocabularyUpload({
           "The AI could not read this document. Try exporting it again or upload a clear image.",
         );
       }
+      clearInterval(progressInterval);
+      setProgress(100);
+      await new Promise((r) => setTimeout(r, 300));
       setEntries(result.data.entries);
       setWarnings(result.data.warnings);
       setReviewVersion((version) => version + 1);
@@ -88,10 +102,12 @@ export function VocabularyUpload({
         toast.error(message);
       }
     } finally {
+      clearInterval(progressInterval);
       clearTimeout(timeout);
       if (requestRef.current === controller) {
         requestRef.current = null;
         setExtracting(false);
+        setProgress(0);
       }
     }
   }
@@ -106,6 +122,28 @@ export function VocabularyUpload({
     setOpen(false);
     setEntries([]);
     setWarnings([]);
+  }
+
+  function handleOpenManual() {
+    if (extracting) return;
+    if (entries.length === 0) {
+      setEntries([createEmptyVocabularyEntry()]);
+      setReviewVersion((v) => v + 1);
+    }
+    setOpen(true);
+  }
+
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      // If user closed dialog and all entries are empty, discard them
+      const hasContent = entries.some(
+        (e) => e.arabic.trim().length > 0 || e.english.trim().length > 0,
+      );
+      if (!hasContent) {
+        setEntries([]);
+      }
+    }
   }
 
   return (
@@ -133,28 +171,45 @@ export function VocabularyUpload({
           </Button>
         </div>
       ) : (
-        <Button
-          variant="primaryOutline"
-          size="lg"
-          className="w-full gap-2 font-bold"
-          disabled={extracting}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          {extracting ? (
-            <>
-              <Spinner className="mr-2" aria-hidden="true" /> Adding words…
-            </>
-          ) : (
-            <>
-              <Plus className="h-5 w-5" aria-hidden="true" /> Add words
-            </>
-          )}
-        </Button>
+        <div className="relative flex w-full items-center">
+          <Button
+            variant="default"
+            size="lg"
+            className="relative w-full overflow-hidden disabled:opacity-100 font-bold border-2 border-slate-200 pr-14"
+            disabled={extracting}
+            onClick={handleOpenManual}
+          >
+            {extracting ? (
+              <span
+                className="absolute inset-y-0 left-0 bg-emerald-500 transition-[width] duration-200 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            ) : null}
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              {extracting ? (
+                <Check className="h-5 w-5" />
+              ) : (
+                <Plus className="h-5 w-5" aria-hidden="true" />
+              )}
+              {extracting ? "Processing..." : "Add words"}
+            </span>
+          </Button>
+          <button
+            type="button"
+            disabled={extracting}
+            onClick={() => fileInputRef.current?.click()}
+            title="Scan document or image with AI"
+            aria-label="Scan document or image with AI"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 active:scale-95 transition focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sky-500 disabled:pointer-events-none"
+          >
+            <ScanLine className="h-5 w-5" aria-hidden="true" />
+          </button>
+        </div>
       )}
       <VocabularyReviewDialog
         key={reviewVersion}
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={handleOpenChange}
         entries={entries}
         onEntriesChange={setEntries}
         existingEntries={existingEntries}

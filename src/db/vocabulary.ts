@@ -72,6 +72,8 @@ export const getVocabulary = cache(async (): Promise<VocabularyEntry[]> => {
     reviewReason: entry.reviewReason,
     partOfSpeech: entry.partOfSpeech,
     grammar: entry.grammar,
+    audioSrc: entry.audioSrc,
+    category: entry.category,
     sourceIds: sourceIds.get(entry.id) ?? [],
   }));
 });

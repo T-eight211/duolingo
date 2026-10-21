@@ -60,6 +60,8 @@ export async function saveUserVocabulary(
           needsReview: entry.needsReview,
           reviewReason: entry.reviewReason,
           normalizedKey: entry.normalizedKey,
+          audioSrc: entry.audioSrc ?? null,
+          category: entry.category ?? null,
         })),
       )
       .onConflictDoUpdate({
@@ -72,6 +74,8 @@ export async function saveUserVocabulary(
         set: {
           partOfSpeech: sql`COALESCE(excluded.part_of_speech, user_vocabulary.part_of_speech)`,
           grammar: sql`COALESCE(excluded.grammar, user_vocabulary.grammar)`,
+          audioSrc: sql`COALESCE(excluded.audio_src, user_vocabulary.audio_src)`,
+          category: sql`COALESCE(excluded.category, user_vocabulary.category)`,
         },
       })
       .returning({ id: userVocabulary.id });
@@ -123,6 +127,26 @@ export async function updateWordGrammar(
     .set({
       partOfSpeech: grammar.part_of_speech,
       grammar,
+    })
+    .where(
+      and(
+        eq(userVocabulary.id, wordId),
+        eq(userVocabulary.userId, userId),
+      ),
+    )
+    .returning();
+  return updated;
+}
+
+export async function updateWordCategory(
+  userId: string,
+  wordId: string,
+  category: string | null,
+) {
+  const [updated] = await db
+    .update(userVocabulary)
+    .set({
+      category: category ? category.trim() : null,
     })
     .where(
       and(

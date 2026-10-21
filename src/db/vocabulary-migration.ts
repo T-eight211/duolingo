@@ -23,7 +23,11 @@ CREATE TABLE IF NOT EXISTS public.user_vocabulary (
 CREATE INDEX IF NOT EXISTS user_vocabulary_course_idx ON public.user_vocabulary(course_id);
 ALTER TABLE public.user_vocabulary ADD COLUMN IF NOT EXISTS part_of_speech text;
 ALTER TABLE public.user_vocabulary ADD COLUMN IF NOT EXISTS grammar jsonb;
+ALTER TABLE public.user_vocabulary ADD COLUMN IF NOT EXISTS audio_src text;
+ALTER TABLE public.user_vocabulary ADD COLUMN IF NOT EXISTS category text;
+UPDATE storage.buckets SET public = true WHERE id = 'Duolingo Arabic Words Audio';
 CREATE INDEX IF NOT EXISTS user_vocabulary_pos_idx ON public.user_vocabulary(course_id, part_of_speech);
+CREATE INDEX IF NOT EXISTS user_vocabulary_category_idx ON public.user_vocabulary(course_id, category);
 CREATE TABLE IF NOT EXISTS public.user_vocabulary_links (
   user_id text NOT NULL,
   course_id integer NOT NULL,

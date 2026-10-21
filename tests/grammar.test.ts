@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   GrammarSchema,
   getAllowedVerbChoices,
+  getAllowedNounChoices,
   getAllowedNounPluralTypes,
   getAllowedParticleEffects,
 } from "../src/lib/arabic-grammar";
@@ -456,6 +457,40 @@ describe("Arabic Grammar Constraints & Path Validation", () => {
       expect(choices.mood).toEqual([]);
       expect(choices.voice).toEqual(["active"]);
       expect(choices.future_marker).toEqual([]);
+    });
+
+    it("getAllowedNounChoices correctly constrains proper_noun to definite", () => {
+      const choices = getAllowedNounChoices({
+        subtype: "proper_noun",
+      });
+      expect(choices.definiteness).toEqual(["definite"]);
+      expect(choices.definiteness_source).toEqual(["proper_noun"]);
+    });
+
+    it("getAllowedNounChoices excludes definite-only subtypes when indefinite", () => {
+      const choices = getAllowedNounChoices({
+        definiteness: "indefinite",
+      });
+      expect(choices.subtypes).not.toContain("proper_noun");
+      expect(choices.subtypes).not.toContain("pronoun");
+      expect(choices.subtypes).not.toContain("demonstrative");
+      expect(choices.subtypes).not.toContain("relative_pronoun");
+      expect(choices.definiteness_source).toEqual([]);
+    });
+
+    it("getAllowedNounChoices constrains active_participle derivation", () => {
+      const choices = getAllowedNounChoices({
+        subtype: "active_participle",
+      });
+      expect(choices.derivation).toEqual(["active_participle"]);
+    });
+
+    it("getAllowedNounChoices constrains possessor agreement paths", () => {
+      const choices = getAllowedNounChoices({
+        possessor: { person: 1 },
+      });
+      expect(choices.possessor.number).toEqual(["singular", "plural"]);
+      expect(choices.possessor.gender).toEqual(["not_distinguished"]);
     });
   });
 });

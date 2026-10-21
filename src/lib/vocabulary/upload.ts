@@ -2,7 +2,7 @@ import "server-only";
 
 import sharp from "sharp";
 
-export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+export const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
 export const MAX_UPLOAD_REQUEST_BYTES = MAX_UPLOAD_BYTES + 64 * 1024;
 
 export type VocabularyUpload = {
@@ -22,7 +22,7 @@ export class VocabularyUploadError extends Error {
 }
 
 const IMAGE_OPTIONS = {
-  limitInputPixels: 25_000_000,
+  limitInputPixels: 60_000_000,
   failOn: "warning" as const,
 };
 
@@ -52,7 +52,7 @@ export async function validateVocabularyUpload(
       "This file is empty. Choose an image or PDF with vocabulary.",
     );
   if (file.size > MAX_UPLOAD_BYTES) {
-    throw new VocabularyUploadError("Choose a file smaller than 4 MB.", 413);
+    throw new VocabularyUploadError("Choose a file smaller than 20 MB.", 413);
   }
 
   const data = Buffer.from(await file.arrayBuffer());
@@ -115,7 +115,7 @@ export async function validateVocabularyUpload(
     return { data: image, mediaType: "image/jpeg", name: "vocabulary.jpg" };
   } catch {
     throw new VocabularyUploadError(
-      "This image could not be read. Use a clear, still image under 25 megapixels.",
+      "This image could not be read. Use a clear, still image.",
     );
   }
 }
@@ -141,7 +141,7 @@ export async function readVocabularyUpload(
     if (!Number.isSafeInteger(length) || length <= 0)
       throw new VocabularyUploadError("The upload is empty or invalid.");
     if (length > MAX_UPLOAD_REQUEST_BYTES)
-      throw new VocabularyUploadError("Choose a file smaller than 4 MB.", 413);
+      throw new VocabularyUploadError("Choose a file smaller than 20 MB.", 413);
   }
   if (!request.body)
     throw new VocabularyUploadError("Choose an image or PDF to upload.");
@@ -157,7 +157,7 @@ export async function readVocabularyUpload(
       if (size > MAX_UPLOAD_REQUEST_BYTES) {
         await reader.cancel();
         throw new VocabularyUploadError(
-          "Choose a file smaller than 4 MB.",
+          "Choose a file smaller than 20 MB.",
           413,
         );
       }

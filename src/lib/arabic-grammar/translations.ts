@@ -327,23 +327,14 @@ export function createDefaultGrammar(pos: PartOfSpeech): GrammarAnalysis {
     case "noun":
       return {
         part_of_speech: "noun",
-        subtype: "common_noun",
-        gender: "masculine",
-        number: "singular",
-      };
+      } as GrammarAnalysis;
     case "verb":
       return {
         part_of_speech: "verb",
-        aspect: "perfect",
-        person: 3,
-        gender: "masculine",
-        number: "singular",
-        voice: "active",
-      };
+      } as GrammarAnalysis;
     case "particle":
       return {
         part_of_speech: "particle",
-        subtype: "preposition",
-      };
+      } as GrammarAnalysis;
   }
 }

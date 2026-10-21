@@ -28,6 +28,7 @@ export type {
 export {
   checkGrammarPaths,
   getAllowedVerbChoices,
+  getAllowedNounChoices,
   getAllowedNounPluralTypes,
   getAllowedParticleEffects,
 } from "./validate-paths";

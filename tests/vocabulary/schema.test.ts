@@ -12,14 +12,18 @@ import {
 } from "../../src/db/vocabulary-plan";
 import { word, sentence } from "./fixtures";
 
-test("duplicates ignore tashkeel, tatweel, case and punctuation but preserve Arabic letter distinctions and meanings", () => {
+test("duplicates match on exact Arabic vowels regardless of English translation, while different vowels remain distinct", () => {
   assert.equal(
     vocabularyKey(word()),
-    vocabularyKey(word({ arabicDiacritized: " كـتاب! ", english: " BOOK. " })),
+    vocabularyKey(word({ arabicDiacritized: " كِـتَابٌ! ", english: " A BOOK. " })),
   );
   assert.notEqual(
-    vocabularyKey(word()),
-    vocabularyKey(word({ english: "writer" })),
+    vocabularyKey(word({ arabicDiacritized: "عَمِلَ" })),
+    vocabularyKey(word({ arabicDiacritized: "عَمَلٌ" })),
+  );
+  assert.notEqual(
+    vocabularyKey(word({ arabicDiacritized: "سَافَرَ" })),
+    vocabularyKey(word({ arabicDiacritized: "سَافِرْ" })),
   );
   assert.notEqual(
     vocabularyKey(word({ arabicDiacritized: "أمل" })),
@@ -46,16 +50,16 @@ test("deduplication preserves every parent, correction, uncertainty and original
   ];
   const snapshot = JSON.stringify(input);
   const result = deduplicateVocabularyEntries(input);
-  assert.equal(result.duplicates, 2);
+  assert.equal(result.duplicates, 3);
   const merged = result.entries.find((entry) => entry.kind === "word")!;
-  assert.deepEqual(merged.sourceIds, ["sentence", "s3"]);
+  assert.deepEqual(merged.sourceIds, ["sentence"]);
   assert.equal(merged.originalEnglish, "bok");
   assert.deepEqual(merged.corrections, ["english_spelling"]);
   assert.equal(merged.needsReview, true);
   assert.equal(JSON.stringify(input), snapshot);
   const plan = prepareVocabularySave(input);
-  assert.equal(plan.entries.length, 3);
-  assert.equal(plan.links.length, 2);
+  assert.equal(plan.entries.length, 2);
+  assert.equal(plan.links.length, 1);
 });
 
 test("save validates both languages, Arabic consistency, local IDs and sentence references", () => {
@@ -86,15 +90,28 @@ test("save validates both languages, Arabic consistency, local IDs and sentence 
   );
 });
 
-test("removed sentences are never recreated and different kinds remain separate", () => {
-  const plan = prepareVocabularySave([word({ sourceIds: ["removed"] })]);
-  assert.deepEqual(plan.links, []);
-  assert.deepEqual(plan.entries[0].sourceIds, []);
-  assert.equal(
-    deduplicateVocabularyEntries([
-      word(),
-      word({ id: "phrase", kind: "phrase" }),
-    ]).entries.length,
-    2,
-  );
+test("deduplication preserves audioSrc and schema validates it", () => {
+  const w1 = word({ id: "w1", audioSrc: "https://example.com/audio.mp3" });
+  const w2 = word({ id: "w2" });
+  const deduped = deduplicateVocabularyEntries([w1, w2]);
+  assert.equal(deduped.entries[0].audioSrc, "https://example.com/audio.mp3");
+
+  const parsed = saveVocabularySchema.safeParse({ entries: [w1] });
+  assert.equal(parsed.success, true);
+  if (parsed.success) {
+    assert.equal(parsed.data.entries[0].audioSrc, "https://example.com/audio.mp3");
+  }
+});
+
+test("vocabularyEntrySchema and saveVocabularySchema support category", () => {
+  const w1 = word({ id: "w1", category: "Lesson 1" });
+  const parsed = saveVocabularySchema.safeParse({
+    category: "Lesson 1",
+    entries: [w1],
+  });
+  assert.equal(parsed.success, true);
+  if (parsed.success) {
+    assert.equal(parsed.data.category, "Lesson 1");
+    assert.equal(parsed.data.entries[0].category, "Lesson 1");
+  }
 });

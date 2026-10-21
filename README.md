@@ -156,7 +156,7 @@ Validation included a production build, TypeScript, ESLint (one existing lesson-
 
 ## Import Arabic vocabulary
 
-In Arabic **Practice → Words**, use **Camera**, **Image**, or **PDF** to extract vocabulary. Camera requests the rear camera on supported devices and falls back to a file picker elsewhere. Supported files are JPEG, PNG, WebP and unlocked PDF, up to 4 MB; images are limited to 25 megapixels. An upload returns at most 100 words, phrases and sentences. Crop large notes or split long PDFs into smaller sections.
+In Arabic **Practice → Words**, use **Camera**, **Image**, or **PDF** to extract vocabulary. Camera requests the rear camera on supported devices and falls back to a file picker elsewhere. Supported files are JPEG, PNG, WebP and unlocked PDF, up to 20 MB; images are limited to 60 megapixels. An upload returns at most 100 words, phrases and sentences. Crop large notes or split long PDFs into smaller sections.
 
 The server uses AI SDK 7 structured output through Vercel AI Gateway, explicitly authenticated with `VERCEL_AI_GATEWAY_API_KEY`. The default model is `google/gemini-4-argon`; set `VOCABULARY_AI_MODEL` to another Gateway model with image, PDF and structured-output support if needed. The Gateway account must have access and credits for that model. Node.js 22+ is required by AI SDK 7.
 

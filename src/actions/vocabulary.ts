@@ -2,9 +2,14 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { eq } from "drizzle-orm";
+
+import db from "@/db/drizzle";
+import { userProgress } from "@/db/schema";
 
 import {
   saveUserVocabulary,
+  updateWordCategory,
   updateWordGrammar,
   VocabularyCourseError,
 } from "@/db/vocabulary-store";
@@ -12,6 +17,7 @@ import { saveVocabularySchema } from "@/lib/vocabulary/schema";
 import { arabicGrammarSchema } from "@/lib/grammar/schema";
 import { analyzeSingleWordGrammar } from "@/lib/grammar/analyze";
 import type { ArabicGrammar } from "@/lib/grammar/types";
+import { synthesizeAndUploadWordAudio } from "@/lib/audio/polly";
 
 type SaveVocabularyResult =
   | { success: true; added: number; duplicates: number }
@@ -44,7 +50,11 @@ export async function saveVocabulary(
   }
 
   try {
-    const result = await saveUserVocabulary(userId, parsed.data.entries);
+    const entriesWithCategory = parsed.data.entries.map((entry) => ({
+      ...entry,
+      category: entry.category ?? parsed.data.category ?? null,
+    }));
+    const result = await saveUserVocabulary(userId, entriesWithCategory);
     revalidatePath("/practice/words");
     return { success: true, ...result };
   } catch (error) {
@@ -93,6 +103,15 @@ export async function analyzeWordGrammarAction(params: {
 
     if (params.wordId.startsWith("starter-")) {
       const generatedId = crypto.randomUUID();
+      let audioSrc: string | null = null;
+      try {
+        audioSrc = await synthesizeAndUploadWordAudio(
+          params.arabicDiacritized || params.arabic,
+        );
+      } catch (e) {
+        console.warn("Audio synthesis for starter word skipped:", e);
+      }
+
       await saveUserVocabulary(userId, [
         {
           id: generatedId,
@@ -107,6 +126,7 @@ export async function analyzeWordGrammarAction(params: {
           reviewReason: null,
           partOfSpeech: grammar.part_of_speech,
           grammar,
+          audioSrc,
           sourceIds: [],
         },
       ]);
@@ -147,6 +167,15 @@ export async function saveWordGrammarAction(
 
   try {
     if (wordId.startsWith("starter-") && wordData) {
+      let audioSrc: string | null = null;
+      try {
+        audioSrc = await synthesizeAndUploadWordAudio(
+          wordData.arabicDiacritized || wordData.arabic,
+        );
+      } catch (e) {
+        console.warn("Audio synthesis for starter word skipped:", e);
+      }
+
       await saveUserVocabulary(userId, [
         {
           id: crypto.randomUUID(),
@@ -161,6 +190,7 @@ export async function saveWordGrammarAction(
           reviewReason: null,
           partOfSpeech: parsed.data.part_of_speech,
           grammar: parsed.data as ArabicGrammar,
+          audioSrc,
           sourceIds: [],
         },
       ]);
@@ -181,6 +211,67 @@ export async function saveWordGrammarAction(
   } catch (err) {
     console.error("saveWordGrammarAction error:", err);
     return { success: false, error: "Failed to update grammar." };
+  }
+}
+
+export async function completeWordPracticeAction(): Promise<{
+  success: boolean;
+  points?: number;
+  error?: string;
+}> {
+  const { userId } = await auth();
+  if (!userId) {
+    return { success: false, error: "Sign in to record practice points." };
+  }
+
+  try {
+    const [progress] = await db
+      .select({ points: userProgress.points })
+      .from(userProgress)
+      .where(eq(userProgress.userId, userId))
+      .limit(1);
+
+    if (!progress) {
+      return { success: false, error: "User progress not found." };
+    }
+
+    const newPoints = progress.points + 10;
+    await db
+      .update(userProgress)
+      .set({ points: newPoints })
+      .where(eq(userProgress.userId, userId));
+
+    revalidatePath("/practice/words");
+    revalidatePath("/learn");
+    revalidatePath("/quests");
+    revalidatePath("/leaderboard");
+
+    return { success: true, points: newPoints };
+  } catch (err) {
+    console.error("completeWordPracticeAction error:", err);
+    return { success: false, error: "Failed to record practice points." };
+  }
+}
+
+export async function updateWordCategoryAction(
+  wordId: string,
+  category: string | null,
+): Promise<{ success: true } | { success: false; error: string }> {
+  const { userId } = await auth();
+  if (!userId) {
+    return { success: false, error: "Sign in to update category." };
+  }
+
+  try {
+    const updated = await updateWordCategory(userId, wordId, category);
+    if (!updated) {
+      return { success: false, error: "Word not found." };
+    }
+    revalidatePath("/practice/words");
+    return { success: true };
+  } catch (err) {
+    console.error("updateWordCategoryAction error:", err);
+    return { success: false, error: "Failed to update category." };
   }
 }
 

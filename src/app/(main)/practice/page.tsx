@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { BookOpen, Repeat2, Volume2 } from "lucide-react";
 
 import { FeedWrapper } from "@/components/feed-wrapper";
+import { Header } from "@/app/(main)/learn/_components/header";
 import { Promo } from "@/components/promo";
 import { Quests } from "@/components/quests";
 import { StickyWrapper } from "@/components/sticky-wrapper";
@@ -104,6 +105,7 @@ export default async function PracticePage() {
         <Quests points={userProgress.points} />
       </StickyWrapper>
       <FeedWrapper>
+        <Header title="Practice" href="/learn" />
         <header className="flex w-full flex-col items-center">
           <Image src="/practice.svg" alt="" height={90} width={90} />
           <h1 className="my-6 text-center text-2xl font-bold text-neutral-800">

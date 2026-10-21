@@ -2,10 +2,9 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Check, ChevronDown, Trash2 } from "lucide-react";
+import { AlertCircle, Check, ChevronDown, Plus, Trash2, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { saveVocabulary } from "@/actions/vocabulary";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,9 +18,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { GrammarBadges } from "@/components/grammar/grammar-badges";
 import { GrammarEditor } from "@/components/grammar/grammar-editor";
+import { CategoryCombobox } from "@/components/category-combobox";
 import type { ArabicGrammar } from "@/lib/grammar/types";
 import { cn } from "@/lib/utils";
 import {
+  createEmptyVocabularyEntry,
   deduplicateVocabularyEntries,
   saveVocabularySchema,
   stripArabicDiacritics,
@@ -67,6 +68,51 @@ export function VocabularyReviewDialog({
   const [expandedGrammarIds, setExpandedGrammarIds] = useState<Set<string>>(
     new Set(),
   );
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [category, setCategory] = useState<string>("Lesson 1");
+
+  const allExistingCategories = Array.from(
+    new Set(
+      existingEntries
+        .map((e) => e.category)
+        .filter(
+          (c): c is string => typeof c === "string" && c.trim().length > 0,
+        ),
+    ),
+  );
+
+  function playAudio(entry: VocabularyEntry) {
+    if (typeof window === "undefined") return;
+
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
+
+    if (entry.audioSrc) {
+      setSpeakingId(entry.id);
+      const audio = new Audio(entry.audioSrc);
+      currentAudioRef.current = audio;
+
+      audio.onended = () => {
+        setSpeakingId(null);
+        currentAudioRef.current = null;
+      };
+      audio.onerror = () => {
+        setSpeakingId(null);
+        currentAudioRef.current = null;
+        toast.error("Audio playback failed.");
+      };
+      audio.play().catch(() => {
+        setSpeakingId(null);
+        currentAudioRef.current = null;
+      });
+      return;
+    }
+
+    toast.error("No audio available for this word.");
+  }
 
   const sentences = entries.filter((entry) => entry.kind !== "word");
   const words = entries.filter((entry) => entry.kind === "word");
@@ -138,9 +184,22 @@ export function VocabularyReviewDialog({
     );
   }
 
+  function addNewWord() {
+    setError(null);
+    onEntriesChange([...entries, createEmptyVocabularyEntry()]);
+  }
+
   function submit() {
     if (savingRef.current || entries.length === 0) return;
-    const parsed = saveVocabularySchema.safeParse({ entries });
+    const cleanCategory = category.trim() || null;
+    const entriesWithCategory = entries.map((entry) => ({
+      ...entry,
+      category: entry.category || cleanCategory,
+    }));
+    const parsed = saveVocabularySchema.safeParse({
+      category: cleanCategory,
+      entries: entriesWithCategory,
+    });
     if (!parsed.success) {
       const nextErrors: FieldErrors = {};
       for (const issue of parsed.error.issues) {
@@ -290,7 +349,7 @@ export function VocabularyReviewDialog({
                 disabled={isSaving}
                 aria-label={`Arabic sentence ${index + 1}`}
                 placeholder="الجملة بالعربية..."
-                className="font-arabic w-full resize-none bg-transparent text-center text-lg font-bold text-neutral-800 placeholder:text-neutral-300 focus:outline-hidden sm:text-xl"
+                className="font-arabic w-full resize-none bg-transparent text-center text-lg font-bold text-neutral-800 placeholder:text-neutral-300 focus:outline-hidden sm:text-xl pr-10 pl-10"
                 rows={2}
                 maxLength={2400}
               />
@@ -307,10 +366,26 @@ export function VocabularyReviewDialog({
                 disabled={isSaving}
                 aria-label={`Arabic word ${index + 1}`}
                 placeholder="الكلمة..."
-                className="font-arabic w-full bg-transparent text-center text-2xl font-bold text-neutral-800 placeholder:text-neutral-300 focus:outline-hidden sm:text-3xl"
+                className="font-arabic w-full bg-transparent text-center text-2xl font-bold text-neutral-800 placeholder:text-neutral-300 focus:outline-hidden sm:text-3xl pr-10 pl-10"
                 maxLength={2400}
               />
             )}
+
+            {/* Audio Speaker Button inside Arabic card */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                playAudio(entry);
+              }}
+              aria-label={`Play pronunciation for ${entry.english || entry.arabic}`}
+              className={cn(
+                "absolute left-2 sm:left-2.5 top-1/2 -translate-y-1/2 z-10 flex size-8 sm:size-9 items-center justify-center rounded-xl text-sky-500 transition hover:bg-sky-50 hover:text-sky-600 active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sky-400",
+                speakingId === entry.id && "animate-pulse text-sky-600 bg-sky-100/70",
+              )}
+            >
+              <Volume2 className="size-4.5 sm:size-5 stroke-[2.25]" aria-hidden="true" />
+            </button>
           </div>
 
           {/* Remove Entry Button */}
@@ -374,7 +449,7 @@ export function VocabularyReviewDialog({
               <button
                 type="button"
                 onClick={() => toggleGrammar(entry.id)}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-neutral-800 transition py-0.5"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-neutral-800 transition py-0.5 ms-auto ml-auto shrink-0"
               >
                 <span>
                   {expandedGrammarIds.has(entry.id)
@@ -448,16 +523,29 @@ export function VocabularyReviewDialog({
       >
         {/* Header - Matching pairs practice style */}
         <DialogHeader className="shrink-0 px-6 pt-6 pb-4 text-start sm:px-8">
-          <DialogTitle
-            ref={titleRef}
-            tabIndex={-1}
-            className="text-xl font-bold text-neutral-700 sm:text-2xl"
-          >
-            Review your words
-          </DialogTitle>
-          <DialogDescription className="mt-1 text-sm text-muted-foreground sm:text-base">
-            Check each English word with its Arabic translation before adding.
-          </DialogDescription>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div>
+              <DialogTitle
+                ref={titleRef}
+                tabIndex={-1}
+                className="text-xl font-bold text-neutral-700 sm:text-2xl"
+              >
+                Review your words
+              </DialogTitle>
+              <DialogDescription className="mt-1 text-sm text-muted-foreground sm:text-base">
+                Check each English word with its Arabic translation before adding.
+              </DialogDescription>
+            </div>
+            <div className="w-full sm:w-56 shrink-0 pt-0.5">
+              <CategoryCombobox
+                value={category}
+                onValueChange={setCategory}
+                existingCategories={allExistingCategories}
+                disabled={isSaving}
+                placeholder="Category (e.g. Lesson 1)"
+              />
+            </div>
+          </div>
         </DialogHeader>
 
         <form
@@ -473,20 +561,6 @@ export function VocabularyReviewDialog({
 
           <ScrollArea className="h-[50dvh] min-h-0" dir="ltr">
             <div className="flex min-w-0 flex-col gap-5 p-5 sm:p-6 sm:px-8">
-              {warnings.length > 0 && (
-                <Alert className="rounded-2xl border-2">
-                  <AlertCircle aria-hidden="true" />
-                  <AlertTitle>Extraction notes</AlertTitle>
-                  <AlertDescription>
-                    <ul className="flex list-disc flex-col gap-1 ps-4">
-                      {warnings.map((warning, idx) => (
-                        <li key={idx}>{warning}</li>
-                      ))}
-                    </ul>
-                  </AlertDescription>
-                </Alert>
-              )}
-
               {words.length > 0 && (
                 <section
                   className="flex flex-col gap-3"
@@ -498,6 +572,15 @@ export function VocabularyReviewDialog({
                     </h3>
                   )}
                   <ul className="flex flex-col gap-3">{words.map(renderRow)}</ul>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full border-2 border-dashed border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50 font-bold h-12 rounded-2xl flex items-center justify-center gap-2"
+                    onClick={addNewWord}
+                    disabled={isSaving}
+                  >
+                    <Plus className="h-4 w-4" /> Add another word
+                  </Button>
                 </section>
               )}
 
@@ -512,15 +595,31 @@ export function VocabularyReviewDialog({
                   <ul className="flex flex-col gap-3">
                     {sentences.map(renderRow)}
                   </ul>
+                  {words.length === 0 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="w-full border-2 border-dashed border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50 font-bold h-12 rounded-2xl flex items-center justify-center gap-2"
+                      onClick={addNewWord}
+                      disabled={isSaving}
+                    >
+                      <Plus className="h-4 w-4" /> Add a word
+                    </Button>
+                  )}
                 </section>
               )}
 
               {entries.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-10 text-center">
-                  <p className="font-bold text-neutral-700">No entries to review</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Upload another document or image to extract vocabulary.
-                  </p>
+                <div className="flex flex-col items-center justify-center py-10 text-center gap-3">
+                  <p className="font-bold text-neutral-700">No words entered yet</p>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={addNewWord}
+                    className="font-bold"
+                  >
+                    <Plus className="h-4 w-4 mr-1.5" /> Add a word
+                  </Button>
                 </div>
               )}
             </div>

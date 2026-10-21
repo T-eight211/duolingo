@@ -36,6 +36,8 @@ export const rawExtractionResultSchema = z.object({
 export const vocabularyEntrySchema = rawExtractionEntrySchema.extend({
   partOfSpeech: z.enum(["noun", "verb", "particle"]).nullable().optional(),
   grammar: z.any().nullable().optional(),
+  audioSrc: z.string().nullable().optional(),
+  category: z.string().trim().max(100).nullable().optional(),
 });
 
 export const extractionResultSchema = z.object({
@@ -49,6 +51,27 @@ export type ExtractionResult = {
   entries: VocabularyEntry[];
   warnings: string[];
 };
+
+export function createEmptyVocabularyEntry(): VocabularyEntry {
+  const id = `manual-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  return {
+    id,
+    kind: "word",
+    arabic: "",
+    arabicDiacritized: "",
+    english: "",
+    originalArabic: null,
+    originalEnglish: null,
+    corrections: [],
+    needsReview: false,
+    reviewReason: null,
+    sourceIds: [],
+    partOfSpeech: null,
+    grammar: null,
+    audioSrc: null,
+    category: null,
+  };
+}
 
 export function stripArabicDiacritics(text: string): string {
   return text
@@ -66,18 +89,31 @@ function normalizeText(text: string): string {
     .trim();
 }
 
+export function canonicalizeArabic(text: string): string {
+  return text
+    .normalize("NFKC")
+    .replace(/\u0640/g, "")
+    .replace(
+      /([\u0600-\u06ff])([\u064b-\u065f\u0670]+)/g,
+      (_match, base, diacritics) => {
+        return base + Array.from(diacritics).sort().join("");
+      },
+    )
+    .replace(/[\p{P}\p{S}]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function vocabularyKey(
   entry: Pick<
     VocabularyEntry,
     "kind" | "arabic" | "arabicDiacritized" | "english"
   >,
 ): string {
+  const arabicText = entry.arabicDiacritized?.trim() || entry.arabic?.trim() || "";
   return JSON.stringify([
     entry.kind,
-    normalizeText(
-      stripArabicDiacritics(entry.arabicDiacritized || entry.arabic),
-    ),
-    normalizeText(entry.english),
+    canonicalizeArabic(arabicText),
   ]);
 }
 
@@ -103,6 +139,7 @@ export function deduplicateVocabularyEntries(input: VocabularyEntry[]): {
       existing.originalEnglish ||= entry.originalEnglish;
       existing.partOfSpeech ||= entry.partOfSpeech;
       existing.grammar ||= entry.grammar;
+      existing.audioSrc ||= entry.audioSrc;
     } else {
       byKey.set(key, {
         ...entry,
@@ -129,6 +166,7 @@ export function deduplicateVocabularyEntries(input: VocabularyEntry[]): {
 
 export const saveVocabularySchema = z
   .object({
+    category: z.string().trim().max(100).nullable().optional(),
     entries: z
       .array(vocabularyEntrySchema)
       .min(1, "Add at least one entry.")

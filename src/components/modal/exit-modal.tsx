@@ -9,19 +9,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useIsClient } from "@/hooks/use-is-client";
 import Image from "next/image";
 import { Button } from "../ui/button";
 
 export const ExitModal = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const isClient = useIsClient();
-  const { isOpen, close } = useExitModal();
+  const { isOpen, close, redirectUrl } = useExitModal();
 
   if (!isClient) {
     return null;
   }
+
+  const handleEndSession = () => {
+    close();
+    const destination =
+      redirectUrl ||
+      (pathname?.startsWith("/practice/words") ? "/practice/words" : "/learn");
+    router.push(destination);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={close}>
@@ -51,10 +60,7 @@ export const ExitModal = () => {
               variant="dangerOutline"
               className="w-full"
               size="lg"
-              onClick={() => {
-                close();
-                router.push("/learn");
-              }}
+              onClick={handleEndSession}
             >
               End Session
             </Button>

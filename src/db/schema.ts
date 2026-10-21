@@ -183,6 +183,8 @@ export const userVocabulary = pgTable(
     reviewReason: text("review_reason"),
     partOfSpeech: text("part_of_speech").$type<PartOfSpeech>(),
     grammar: jsonb("grammar").$type<ArabicGrammar | null>(),
+    audioSrc: text("audio_src"),
+    category: text("category"),
     // SHA-256 of the normalized bilingual pair keeps sentence indexes bounded.
     normalizedKey: text("normalized_key").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -203,6 +205,7 @@ export const userVocabulary = pgTable(
     ),
     index("user_vocabulary_course_idx").on(table.courseId),
     index("user_vocabulary_pos_idx").on(table.courseId, table.partOfSpeech),
+    index("user_vocabulary_category_idx").on(table.courseId, table.category),
     check(
       "user_vocabulary_kind_check",
       sql`${table.kind} IN ('word', 'phrase', 'sentence')`,

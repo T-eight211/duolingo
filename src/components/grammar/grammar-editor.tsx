@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import {
   checkGrammarPaths,
   getAllowedVerbChoices,
+  getAllowedNounChoices,
   getAllowedNounPluralTypes,
   getAllowedParticleEffects,
   getCategoryLabel,
@@ -53,8 +54,14 @@ function GrammarSelectField({
   disabled = false,
   placeholder,
 }: GrammarSelectFieldProps) {
+  const isValidValue = options.some(
+    (opt) => String(opt.value) === String(currentValue),
+  );
   const hasValue =
-    currentValue !== null && currentValue !== undefined && currentValue !== "";
+    currentValue !== null &&
+    currentValue !== undefined &&
+    currentValue !== "" &&
+    isValidValue;
   const stringValue = hasValue ? String(currentValue) : "";
 
   const defaultPlaceholder = `Select ${label.english.toLowerCase()}`;
@@ -85,7 +92,7 @@ function GrammarSelectField({
       </div>
 
       {/* Select Field with clean trigger and integrated clear button */}
-      <div className="relative shrink-0 flex items-center">
+      <div className="relative shrink-0 flex items-center ms-auto">
         <Select
           value={stringValue}
           onValueChange={(val) => {
@@ -163,6 +170,7 @@ interface GrammarEditorProps {
   englishText?: string;
   onChange: (updated: GrammarAnalysis) => void;
   className?: string;
+  showHeader?: boolean;
 }
 
 export function GrammarEditor({
@@ -171,6 +179,7 @@ export function GrammarEditor({
   englishText,
   onChange,
   className,
+  showHeader = false,
 }: GrammarEditorProps) {
   const grammar = useMemo(
     () => normalizeGrammarAnalysis(initialGrammar),
@@ -194,61 +203,170 @@ export function GrammarEditor({
 
   function handlePosChange(newPos: PartOfSpeech) {
     if (newPos === pos) return;
+    setShowPossessor(false);
+    setShowVerbNegation(false);
+    setShowAttachedPronoun(false);
     const next = createDefaultGrammar(newPos);
     onChange(next);
   }
 
   function updateField(field: string, value: any) {
+    const actualField = field === "subtypes" ? "subtype" : field;
     const next = { ...grammar };
     if (value === undefined || value === null || value === "") {
-      delete (next as any)[field];
+      delete (next as any)[actualField];
+    } else if (actualField === "grammatical_effect") {
+      (next as any).grammatical_effect = Array.isArray(value) ? value : [value];
     } else {
-      (next as any)[field] = value;
+      (next as any)[actualField] = value;
     }
 
-    // Path constraints: clear dependent child fields if parent changed
+    // Path constraints: clear or auto-align dependent child fields
     if (next.part_of_speech === "verb") {
       const verbAnalysis = next as VerbAnalysis;
-      if (field === "aspect") {
-        const choices = getAllowedVerbChoices({ aspect: verbAnalysis.aspect });
-        if (verbAnalysis.person && !choices.person.includes(verbAnalysis.person)) {
-          delete (next as any).person;
-        }
-        if (verbAnalysis.voice && !(choices.voice as readonly string[]).includes(verbAnalysis.voice)) {
-          delete (next as any).voice;
-        }
-        if (verbAnalysis.mood && !(choices.mood as readonly string[]).includes(verbAnalysis.mood)) {
+      if (actualField === "aspect") {
+        if (!verbAnalysis.aspect) {
           delete (next as any).mood;
-        }
-        if (
-          verbAnalysis.future_marker &&
-          !(choices.future_marker as readonly string[]).includes(verbAnalysis.future_marker)
-        ) {
           delete (next as any).future_marker;
-        }
-        if (verbAnalysis.aspect === "imperative") {
+          delete (next as any).energetic_nun;
           delete (next as any).negation;
           setShowVerbNegation(false);
+        } else {
+          const choices = getAllowedVerbChoices({ aspect: verbAnalysis.aspect });
+          if (verbAnalysis.person && !choices.person.includes(verbAnalysis.person)) {
+            delete (next as any).person;
+          }
+          if (verbAnalysis.voice && !(choices.voice as readonly string[]).includes(verbAnalysis.voice)) {
+            delete (next as any).voice;
+          }
+          if (verbAnalysis.mood && !(choices.mood as readonly string[]).includes(verbAnalysis.mood)) {
+            delete (next as any).mood;
+          }
+          if (
+            verbAnalysis.future_marker &&
+            !(choices.future_marker as readonly string[]).includes(verbAnalysis.future_marker)
+          ) {
+            delete (next as any).future_marker;
+          }
+          if (
+            verbAnalysis.energetic_nun &&
+            !(choices.energetic_nun as readonly string[]).includes(verbAnalysis.energetic_nun)
+          ) {
+            delete (next as any).energetic_nun;
+          }
+          if (verbAnalysis.aspect === "imperative") {
+            delete (next as any).negation;
+            setShowVerbNegation(false);
+          }
         }
       }
-      if (field === "person" || field === "number") {
+      if (verbAnalysis.aspect) {
         const choices = getAllowedVerbChoices({
           aspect: verbAnalysis.aspect,
           person: verbAnalysis.person,
           number: verbAnalysis.number,
         });
-        if (verbAnalysis.gender && !choices.gender.includes(verbAnalysis.gender)) {
+        if (verbAnalysis.number && !choices.number.includes(verbAnalysis.number)) {
+          delete (next as any).number;
+          delete (next as any).gender;
+        } else if (verbAnalysis.gender && !choices.gender.includes(verbAnalysis.gender)) {
           delete (next as any).gender;
         }
       }
     } else if (next.part_of_speech === "noun") {
       const nounAnalysis = next as NounAnalysis;
-      if (field === "number" && nounAnalysis.number !== "plural") {
+      if (actualField === "subtype") {
+        if (nounAnalysis.subtype === "proper_noun") {
+          nounAnalysis.definiteness = "definite";
+          nounAnalysis.definiteness_source = "proper_noun";
+        } else if (nounAnalysis.subtype === "pronoun") {
+          nounAnalysis.definiteness = "definite";
+          nounAnalysis.definiteness_source = "pronoun";
+        } else if (nounAnalysis.subtype === "demonstrative") {
+          nounAnalysis.definiteness = "definite";
+          nounAnalysis.definiteness_source = "demonstrative";
+        } else if (nounAnalysis.subtype === "relative_pronoun") {
+          nounAnalysis.definiteness = "definite";
+        } else if (nounAnalysis.subtype === "active_participle") {
+          nounAnalysis.derivation = "active_participle";
+        } else if (nounAnalysis.subtype === "passive_participle") {
+          nounAnalysis.derivation = "passive_participle";
+        } else if (nounAnalysis.subtype === "verbal_noun") {
+          nounAnalysis.derivation = "verbal_noun";
+        }
+      }
+
+      // Check allowed choices and clear invalid values (resetting back to placeholder)
+      // 1. Number -> Plural type
+      const allowedPluralTypes = getAllowedNounPluralTypes(nounAnalysis.number);
+      if (
+        nounAnalysis.plural_type &&
+        !(allowedPluralTypes as readonly string[]).includes(nounAnalysis.plural_type)
+      ) {
         delete (next as any).plural_type;
+      }
+
+      // 2. Subtype -> Definiteness
+      const choicesDef = getAllowedNounChoices({ subtype: nounAnalysis.subtype });
+      if (
+        nounAnalysis.definiteness &&
+        !choicesDef.definiteness.includes(nounAnalysis.definiteness)
+      ) {
+        delete (next as any).definiteness;
+      }
+
+      // 3. Definiteness & Subtype -> Definiteness source
+      const choicesSource = getAllowedNounChoices({
+        subtype: nounAnalysis.subtype,
+        definiteness: nounAnalysis.definiteness,
+      });
+      if (
+        nounAnalysis.definiteness_source &&
+        !choicesSource.definiteness_source.includes(nounAnalysis.definiteness_source)
+      ) {
+        delete (next as any).definiteness_source;
+      }
+
+      // 4. Definiteness & Definiteness Source -> Idafa role
+      const choicesIdafa = getAllowedNounChoices({
+        definiteness: nounAnalysis.definiteness,
+        definiteness_source: nounAnalysis.definiteness_source,
+      });
+      if (
+        nounAnalysis.idafa_role &&
+        !choicesIdafa.idafa_role.includes(nounAnalysis.idafa_role)
+      ) {
+        delete (next as any).idafa_role;
+      }
+
+      // 5. Subtype -> Derivation
+      const choicesDeriv = getAllowedNounChoices({ subtype: nounAnalysis.subtype });
+      if (
+        nounAnalysis.derivation &&
+        !choicesDeriv.derivation.includes(nounAnalysis.derivation)
+      ) {
+        delete (next as any).derivation;
+      }
+
+      // 6. Possessor cleanup: non-possessive subtypes or indefinite cannot have possessor
+      const nonPossessiveSubtypes = [
+        "proper_noun",
+        "pronoun",
+        "demonstrative",
+        "relative_pronoun",
+      ];
+      if (
+        (nounAnalysis.subtype && nonPossessiveSubtypes.includes(nounAnalysis.subtype)) ||
+        nounAnalysis.definiteness === "indefinite"
+      ) {
+        if (nounAnalysis.possessor) {
+          delete (next as any).possessor;
+          setShowPossessor(false);
+        }
       }
     } else if (next.part_of_speech === "particle") {
       const particleAnalysis = next as ParticleAnalysis;
-      if (field === "subtype") {
+      if (actualField === "subtype") {
         const allowed = getAllowedParticleEffects(particleAnalysis.subtype);
         if (particleAnalysis.grammatical_effect) {
           const filtered = particleAnalysis.grammatical_effect.filter((e) =>
@@ -271,6 +389,11 @@ export function GrammarEditor({
     currentValue: string | number | null | undefined,
     allowedValuesFilter?: readonly (string | number)[],
   ) {
+    // If the category cannot have any allowed values based on previous selections, do not show it at all
+    if (allowedValuesFilter !== undefined && allowedValuesFilter.length === 0) {
+      return null;
+    }
+
     const catLabel = getCategoryLabel(pos, categoryKey);
     let options = getAllowedCategoryValues(pos, categoryKey);
 
@@ -280,6 +403,8 @@ export function GrammarEditor({
       );
     }
 
+    const fieldKey = categoryKey === "subtypes" ? "subtype" : categoryKey;
+
     return (
       <GrammarSelectField
         key={categoryKey}
@@ -287,7 +412,7 @@ export function GrammarEditor({
         currentValue={currentValue}
         options={options}
         isNumeric={categoryKey === "person"}
-        onValueChange={(val) => updateField(categoryKey, val)}
+        onValueChange={(val) => updateField(fieldKey, val)}
       />
     );
   }
@@ -306,24 +431,30 @@ export function GrammarEditor({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-2xl border-2 border-slate-200 bg-slate-50/50 p-4 text-start font-sans text-xs sm:p-5",
+        "flex flex-col gap-3 text-start font-sans text-xs",
         className,
       )}
     >
-      {/* Root Node Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-slate-200/80 pb-3">
-        <div className="flex items-center gap-2">
-          <BookOpen className="h-4 w-4 text-sky-500 shrink-0" />
-          <div className="flex items-center gap-2 font-bold text-neutral-800 text-sm">
-            {wordText && (
-              <span dir="rtl" lang="ar" className="font-arabic text-base text-neutral-900">
-                {wordText}
-              </span>
-            )}
-            {wordText && englishText && <span className="text-slate-300">-</span>}
-            {englishText && <span className="text-slate-600">{englishText}</span>}
+      {/* Root Node Header / Part of Speech Selector */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-1 border-b border-slate-200/80">
+        {showHeader && (wordText || englishText) ? (
+          <div className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4 text-sky-500 shrink-0" />
+            <div className="flex items-center gap-2 font-bold text-neutral-800 text-sm">
+              {wordText && (
+                <span dir="rtl" lang="ar" className="font-arabic text-base text-neutral-900">
+                  {wordText}
+                </span>
+              )}
+              {wordText && englishText && <span className="text-slate-300">-</span>}
+              {englishText && <span className="text-slate-600">{englishText}</span>}
+            </div>
           </div>
-        </div>
+        ) : (
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            Part of Speech
+          </span>
+        )}
 
         {/* Part of Speech Switcher */}
         <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-2xs">
@@ -372,116 +503,144 @@ export function GrammarEditor({
         {/* Noun Characteristics */}
         {pos === "noun" && (() => {
           const n = grammar as NounAnalysis;
-          const allowedPlural = getAllowedNounPluralTypes(n.number);
+          const nounChoices = getAllowedNounChoices(n);
+          const nonPossessiveSubtypes = [
+            "proper_noun",
+            "pronoun",
+            "demonstrative",
+            "relative_pronoun",
+          ];
+          const canHavePossessor =
+            !n.subtype ||
+            (!nonPossessiveSubtypes.includes(n.subtype) &&
+              n.definiteness !== "indefinite");
 
           return (
             <>
-              {renderCategoryBranch("subtypes", n.subtype)}
-              {renderCategoryBranch("gender", n.gender)}
-              {renderCategoryBranch("number", n.number)}
-              {n.number === "plural" &&
-                renderCategoryBranch("plural_type", n.plural_type, allowedPlural)}
-              {renderCategoryBranch("case", n.case)}
-              {renderCategoryBranch("definiteness", n.definiteness)}
-              {renderCategoryBranch("definiteness_source", n.definiteness_source)}
-              {renderCategoryBranch("idafa_role", n.idafa_role)}
-              {renderCategoryBranch("rationality", n.rationality)}
-              {renderCategoryBranch("derivation", n.derivation)}
+              {renderCategoryBranch("subtypes", n.subtype, nounChoices.subtypes)}
+              {renderCategoryBranch("gender", n.gender, nounChoices.gender)}
+              {renderCategoryBranch("number", n.number, nounChoices.number)}
+              {renderCategoryBranch("plural_type", n.plural_type, nounChoices.plural_type)}
+              {renderCategoryBranch("case", n.case, nounChoices.case)}
+              {renderCategoryBranch("definiteness", n.definiteness, nounChoices.definiteness)}
+              {renderCategoryBranch(
+                "definiteness_source",
+                n.definiteness_source,
+                nounChoices.definiteness_source,
+              )}
+              {renderCategoryBranch("idafa_role", n.idafa_role, nounChoices.idafa_role)}
+              {renderCategoryBranch("rationality", n.rationality, nounChoices.rationality)}
+              {renderCategoryBranch("derivation", n.derivation, nounChoices.derivation)}
 
               {/* Nested Possessor Tree Branch */}
-              <div className="relative mt-1 ps-4">
-                <span
-                  className="absolute -left-0.5 top-4 h-px w-3.5 bg-slate-300"
-                  aria-hidden="true"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const nextState = !showPossessor;
-                    setShowPossessor(nextState);
-                    if (!nextState) {
-                      updateField("possessor", undefined);
-                    } else if (!n.possessor) {
-                      updateField("possessor", {
-                        person: 3,
-                        gender: "masculine",
-                        number: "singular",
-                      });
-                    }
-                  }}
-                  className="flex items-center gap-1.5 rounded-lg py-1 font-bold text-slate-700 hover:text-sky-600 transition"
-                >
-                  {showPossessor ? (
-                    <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-                  ) : (
-                    <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
-                  )}
-                  <span dir="rtl" lang="ar" className="font-arabic">
-                    ضمير الملكية المتصل
-                  </span>
-                  <span className="text-slate-300">-</span>
-                  <span>Attached Possessive Pronoun</span>
-                  <Badge
-                    variant={showPossessor ? "secondary" : "outline"}
-                    className="ms-2 px-1.5 py-0 text-[10px]"
+              {canHavePossessor && (
+                <div className="relative mt-1 ps-4">
+                  <span
+                    className="absolute -left-0.5 top-4 h-px w-3.5 bg-slate-300"
+                    aria-hidden="true"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextState = !showPossessor;
+                      setShowPossessor(nextState);
+                      if (!nextState) {
+                        updateField("possessor", undefined);
+                      } else if (!n.possessor) {
+                        updateField("possessor", {
+                          person: 3,
+                          gender: "masculine",
+                          number: "singular",
+                        });
+                      }
+                    }}
+                    className="flex items-center gap-1.5 rounded-lg py-1 font-bold text-slate-700 hover:text-sky-600 transition"
                   >
-                    {showPossessor ? "Active" : "None"}
-                  </Badge>
-                </button>
+                    {showPossessor ? (
+                      <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                    ) : (
+                      <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+                    )}
+                    <span dir="rtl" lang="ar" className="font-arabic">
+                      ضمير الملكية المتصل
+                    </span>
+                    <span className="text-slate-300">-</span>
+                    <span>Attached Possessive Pronoun</span>
+                    <Badge
+                      variant={showPossessor ? "secondary" : "outline"}
+                      className="ms-2 px-1.5 py-0 text-[10px]"
+                    >
+                      {showPossessor ? "Active" : "None"}
+                    </Badge>
+                  </button>
 
-                {showPossessor && (
-                  <div className="relative mt-1 flex flex-col gap-1 border-s-2 border-slate-200 ps-2 ms-2">
-                    <GrammarSelectField
-                      label={{ arabic: "الشخص", english: "Person" }}
-                      currentValue={n.possessor?.person ?? 3}
-                      isNumeric
-                      options={[
-                        { value: 1, arabic: "المتكلم", english: "1st Person" },
-                        { value: 2, arabic: "المخاطب", english: "2nd Person" },
-                        { value: 3, arabic: "الغائب", english: "3rd Person" },
-                      ]}
-                      onValueChange={(val) =>
-                        updateField("possessor", {
-                          ...(n.possessor || { gender: "masculine", number: "singular" }),
-                          person: val as 1 | 2 | 3,
-                        })
-                      }
-                    />
+                  {showPossessor && (
+                    <div className="relative mt-1 flex flex-col gap-1 border-s-2 border-slate-200 ps-2 ms-2">
+                      <GrammarSelectField
+                        label={{ arabic: "الشخص", english: "Person" }}
+                        currentValue={n.possessor?.person ?? 3}
+                        isNumeric
+                        options={[
+                          { value: 1, arabic: "المتكلم", english: "1st Person" },
+                          { value: 2, arabic: "المخاطب", english: "2nd Person" },
+                          { value: 3, arabic: "الغائب", english: "3rd Person" },
+                        ]}
+                        onValueChange={(val) => {
+                          const newPossessor = {
+                            ...(n.possessor || { gender: "masculine", number: "singular" }),
+                            person: val as 1 | 2 | 3,
+                          };
+                          const pChoices = getAllowedNounChoices({ possessor: newPossessor }).possessor;
+                          if (!pChoices.number.includes(newPossessor.number)) {
+                            newPossessor.number = pChoices.number[0] as any;
+                          }
+                          if (!pChoices.gender.includes(newPossessor.gender)) {
+                            newPossessor.gender = pChoices.gender[0] as any;
+                          }
+                          updateField("possessor", newPossessor);
+                        }}
+                      />
 
-                    <GrammarSelectField
-                      label={{ arabic: "الجنس", english: "Gender" }}
-                      currentValue={n.possessor?.gender ?? "masculine"}
-                      options={[
-                        { value: "masculine", arabic: "مذكر", english: "Masculine" },
-                        { value: "feminine", arabic: "مؤنث", english: "Feminine" },
-                        { value: "not_distinguished", arabic: "غير مميز", english: "Not Distinguished" },
-                      ]}
-                      onValueChange={(val) =>
-                        updateField("possessor", {
-                          ...(n.possessor || { person: 3, number: "singular" }),
-                          gender: val,
-                        })
-                      }
-                    />
+                      <GrammarSelectField
+                        label={{ arabic: "العدد", english: "Number" }}
+                        currentValue={n.possessor?.number ?? "singular"}
+                        options={[
+                          { value: "singular", arabic: "مفرد", english: "Singular" },
+                          { value: "dual", arabic: "مثنى", english: "Dual" },
+                          { value: "plural", arabic: "جمع", english: "Plural" },
+                        ].filter((opt) => nounChoices.possessor.number.includes(opt.value))}
+                        onValueChange={(val) => {
+                          const newPossessor = {
+                            ...(n.possessor || { person: 3 as const, gender: "masculine" }),
+                            number: val,
+                          };
+                          const pChoices = getAllowedNounChoices({ possessor: newPossessor }).possessor;
+                          if (!pChoices.gender.includes(newPossessor.gender)) {
+                            newPossessor.gender = pChoices.gender[0] as any;
+                          }
+                          updateField("possessor", newPossessor);
+                        }}
+                      />
 
-                    <GrammarSelectField
-                      label={{ arabic: "العدد", english: "Number" }}
-                      currentValue={n.possessor?.number ?? "singular"}
-                      options={[
-                        { value: "singular", arabic: "مفرد", english: "Singular" },
-                        { value: "dual", arabic: "مثنى", english: "Dual" },
-                        { value: "plural", arabic: "جمع", english: "Plural" },
-                      ]}
-                      onValueChange={(val) =>
-                        updateField("possessor", {
-                          ...(n.possessor || { person: 3, gender: "masculine" }),
-                          number: val,
-                        })
-                      }
-                    />
-                  </div>
-                )}
-              </div>
+                      <GrammarSelectField
+                        label={{ arabic: "الجنس", english: "Gender" }}
+                        currentValue={n.possessor?.gender ?? "masculine"}
+                        options={[
+                          { value: "masculine", arabic: "مذكر", english: "Masculine" },
+                          { value: "feminine", arabic: "مؤنث", english: "Feminine" },
+                          { value: "not_distinguished", arabic: "غير مميز", english: "Not Distinguished" },
+                        ].filter((opt) => nounChoices.possessor.gender.includes(opt.value))}
+                        onValueChange={(val) =>
+                          updateField("possessor", {
+                            ...(n.possessor || { person: 3, number: "singular" }),
+                            gender: val,
+                          })
+                        }
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
             </>
           );
         })()}
@@ -738,17 +897,19 @@ export function GrammarEditor({
           return (
             <>
               {renderCategoryBranch("subtypes", p.subtype)}
-              <GrammarSelectField
-                label={{ arabic: "الأثر الإعرابي", english: "Grammatical Effect" }}
-                currentValue={p.grammatical_effect?.[0]}
-                options={allowedEffects.map((eff) => ({
-                  value: eff,
-                  ...getCategoryLabel("particle", eff),
-                }))}
-                onValueChange={(val) =>
-                  updateField("grammatical_effect", val ? [val] : undefined)
-                }
-              />
+              {allowedEffects.length > 0 && (
+                <GrammarSelectField
+                  label={{ arabic: "الأثر الإعرابي", english: "Grammatical Effect" }}
+                  currentValue={p.grammatical_effect?.[0]}
+                  options={allowedEffects.map((eff) => ({
+                    value: eff,
+                    ...getCategoryLabel("particle", eff),
+                  }))}
+                  onValueChange={(val) =>
+                    updateField("grammatical_effect", val ? [val] : undefined)
+                  }
+                />
+              )}
             </>
           );
         })()}

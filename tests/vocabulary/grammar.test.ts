@@ -7,6 +7,7 @@ import {
   getValueLabel,
   getGrammarSummaryBadges,
   getAllowedCategoryValues,
+  createDefaultGrammar,
 } from "../../src/lib/grammar/translations";
 import {
   vocabularyEntrySchema,
@@ -185,4 +186,19 @@ test("vocabularyEntrySchema and saveVocabularySchema preserve grammar classifica
   const plan = prepareVocabularySave([entry]);
   assert.equal(plan.entries[0].partOfSpeech, "noun");
   assert.deepEqual(plan.entries[0].grammar, grammar);
+});
+
+test("createDefaultGrammar returns unpopulated grammar objects without preselected fields", () => {
+  const nounDefault = createDefaultGrammar("noun");
+  assert.deepEqual(nounDefault, { part_of_speech: "noun" });
+
+  const verbDefault = createDefaultGrammar("verb");
+  assert.deepEqual(verbDefault, { part_of_speech: "verb" });
+
+  const particleDefault = createDefaultGrammar("particle");
+  assert.deepEqual(particleDefault, { part_of_speech: "particle" });
+
+  assert.equal(arabicGrammarSchema.safeParse(verbDefault).success, true);
+  assert.equal(arabicGrammarSchema.safeParse(nounDefault).success, true);
+  assert.equal(arabicGrammarSchema.safeParse(particleDefault).success, true);
 });
