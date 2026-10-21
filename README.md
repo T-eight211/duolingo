@@ -81,7 +81,7 @@ npm install
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
 CLERK_SECRET_KEY=your_clerk_secret_key
 DATABASE_URL=your_postgres_connection_string
-VERCEL_AI_GATEWAY_API_KEY=your_vercel_ai_gateway_key
+VERCELAI_GATEWAY_API_KEY=your_vercel_ai_gateway_key
 STRIPE_API_KEY=your_stripe_api_key (optional)
 STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret (optional)
 NEXT_PUBLIC_APP_URL=your_app_url (optional for custom frontend URL)
@@ -158,7 +158,7 @@ Validation included a production build, TypeScript, ESLint (one existing lesson-
 
 In Arabic **Practice → Words**, use **Camera**, **Image**, or **PDF** to extract vocabulary. Camera requests the rear camera on supported devices and falls back to a file picker elsewhere. Supported files are JPEG, PNG, WebP and unlocked PDF, up to 20 MB; images are limited to 60 megapixels. An upload returns at most 100 words, phrases and sentences. Crop large notes or split long PDFs into smaller sections.
 
-The server uses AI SDK 7 structured output through Vercel AI Gateway, explicitly authenticated with `VERCEL_AI_GATEWAY_API_KEY`. The default model is `google/gemini-4-argon`; set `VOCABULARY_AI_MODEL` to another Gateway model with image, PDF and structured-output support if needed. The Gateway account must have access and credits for that model. Node.js 22+ is required by AI SDK 7.
+The server uses AI SDK 7 structured output through Vercel AI Gateway, explicitly authenticated with `VERCELAI_GATEWAY_API_KEY`. The default model is `google/gemini-4-argon`; set `VOCABULARY_AI_MODEL` to another Gateway model with image, PDF and structured-output support if needed. The Gateway account must have access and credits for that model. Node.js 22+ is required by AI SDK 7.
 
 The AI prompt requests Modern Standard Arabic, English translations, full tashkeel, spelling and translation correction, original text, uncertainty flags, and sentence-to-word links. It performs no grammar classification. Model output is schema-validated; users review and edit it before **Add Words** saves anything. Photos/PDFs go to the Gateway for extraction and are not persisted by this app. Image metadata is removed before sending. Closing review keeps the draft in memory on that page; navigating away discards it.
 

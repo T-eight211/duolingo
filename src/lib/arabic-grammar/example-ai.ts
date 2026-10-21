@@ -12,9 +12,9 @@ export interface GrammarAnalysisResult {
 }
 
 export function getArabicGrammarModel(): LanguageModel {
-  const apiKey = process.env.VERCEL_AI_GATEWAY_API_KEY;
+  const apiKey = process.env.VERCELAI_GATEWAY_API_KEY;
   if (!apiKey?.trim()) {
-    throw new Error("VERCEL_AI_GATEWAY_API_KEY is not configured.");
+    throw new Error("VERCELAI_GATEWAY_API_KEY is not configured.");
   }
   const gateway = createGateway({ apiKey });
   const modelId =

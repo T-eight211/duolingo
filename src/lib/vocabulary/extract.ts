@@ -112,7 +112,7 @@ export function cleanTenseBrackets(text: string): string {
 }
 
 function configuredModel(): LanguageModel {
-  const apiKey = process.env.VERCEL_AI_GATEWAY_API_KEY;
+  const apiKey = process.env.VERCELAI_GATEWAY_API_KEY;
   if (!apiKey?.trim()) {
     throw new VocabularyExtractionError(
       "Vocabulary extraction is not configured yet. Please contact the site owner.",
