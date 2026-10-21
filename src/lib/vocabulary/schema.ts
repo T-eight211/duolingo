@@ -38,6 +38,9 @@ export const vocabularyEntrySchema = rawExtractionEntrySchema.extend({
   grammar: z.any().nullable().optional(),
   audioSrc: z.string().nullable().optional(),
   category: z.string().trim().max(100).nullable().optional(),
+  errorCount: z.number().int().nonnegative().optional(),
+  correctCount: z.number().int().nonnegative().optional(),
+  lastPracticedAt: z.string().nullable().optional(),
 });
 
 export const extractionResultSchema = z.object({
@@ -70,6 +73,9 @@ export function createEmptyVocabularyEntry(): VocabularyEntry {
     grammar: null,
     audioSrc: null,
     category: null,
+    errorCount: 0,
+    correctCount: 0,
+    lastPracticedAt: null,
   };
 }
 
@@ -140,6 +146,10 @@ export function deduplicateVocabularyEntries(input: VocabularyEntry[]): {
       existing.partOfSpeech ||= entry.partOfSpeech;
       existing.grammar ||= entry.grammar;
       existing.audioSrc ||= entry.audioSrc;
+      existing.category ||= entry.category;
+      existing.errorCount = Math.max(existing.errorCount ?? 0, entry.errorCount ?? 0);
+      existing.correctCount = Math.max(existing.correctCount ?? 0, entry.correctCount ?? 0);
+      existing.lastPracticedAt ||= entry.lastPracticedAt;
     } else {
       byKey.set(key, {
         ...entry,

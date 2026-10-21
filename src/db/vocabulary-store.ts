@@ -158,3 +158,44 @@ export async function updateWordCategory(
   return updated;
 }
 
+export async function recordWordPracticeResults(
+  userId: string,
+  params: {
+    mistakeWordIds?: string[];
+    cleanSuccessWordIds?: string[];
+  },
+) {
+  const { mistakeWordIds = [], cleanSuccessWordIds = [] } = params;
+
+  if (mistakeWordIds.length > 0) {
+    await db
+      .update(userVocabulary)
+      .set({
+        errorCount: sql`${userVocabulary.errorCount} + 1`,
+        lastPracticedAt: sql`now()`,
+      })
+      .where(
+        and(
+          eq(userVocabulary.userId, userId),
+          inArray(userVocabulary.id, mistakeWordIds),
+        ),
+      );
+  }
+
+  if (cleanSuccessWordIds.length > 0) {
+    await db
+      .update(userVocabulary)
+      .set({
+        correctCount: sql`${userVocabulary.correctCount} + 1`,
+        errorCount: sql`GREATEST(0, ${userVocabulary.errorCount} - 1)`,
+        lastPracticedAt: sql`now()`,
+      })
+      .where(
+        and(
+          eq(userVocabulary.userId, userId),
+          inArray(userVocabulary.id, cleanSuccessWordIds),
+        ),
+      );
+  }
+}
+

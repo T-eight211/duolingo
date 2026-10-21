@@ -74,6 +74,9 @@ export const getVocabulary = cache(async (): Promise<VocabularyEntry[]> => {
     grammar: entry.grammar,
     audioSrc: entry.audioSrc,
     category: entry.category,
+    errorCount: entry.errorCount ?? 0,
+    correctCount: entry.correctCount ?? 0,
+    lastPracticedAt: entry.lastPracticedAt ? entry.lastPracticedAt.toISOString() : null,
     sourceIds: sourceIds.get(entry.id) ?? [],
   }));
 });

@@ -291,7 +291,7 @@ export function VocabularyReviewDialog({
             className={cn(
               "relative flex flex-1 items-center justify-center rounded-2xl border-2 border-b-4 border-slate-200 bg-white transition-all",
               "hover:bg-slate-50/80 focus-within:border-sky-400 focus-within:ring-2 focus-within:ring-sky-100",
-              isSentence ? "min-h-[76px] p-3" : "h-[68px] sm:h-[76px] px-3",
+              isSentence ? "min-h-[68px] sm:min-h-[76px] p-2.5 sm:p-3" : "h-[58px] sm:h-[72px] px-2 sm:px-3",
               errors?.english &&
                 "border-rose-400 bg-rose-50/30 focus-within:border-rose-400 focus-within:ring-rose-100",
             )}
@@ -306,7 +306,7 @@ export function VocabularyReviewDialog({
                 disabled={isSaving}
                 aria-label={`English translation ${index + 1}`}
                 placeholder="English translation..."
-                className="w-full resize-none bg-transparent text-center text-sm font-bold text-neutral-700 placeholder:text-neutral-300 focus:outline-hidden sm:text-base"
+                className="w-full resize-none bg-transparent text-center text-xs font-bold text-neutral-700 placeholder:text-neutral-300 focus:outline-hidden sm:text-sm"
                 rows={2}
                 maxLength={2400}
               />
@@ -321,7 +321,7 @@ export function VocabularyReviewDialog({
                 disabled={isSaving}
                 aria-label={`English word ${index + 1}`}
                 placeholder="English..."
-                className="w-full bg-transparent text-center text-base font-bold text-neutral-700 placeholder:text-neutral-300 focus:outline-hidden sm:text-lg"
+                className="w-full bg-transparent text-center text-sm font-bold text-neutral-700 placeholder:text-neutral-300 focus:outline-hidden sm:text-base px-1.5"
                 maxLength={2400}
               />
             )}
@@ -332,7 +332,7 @@ export function VocabularyReviewDialog({
             className={cn(
               "relative flex flex-1 items-center justify-center rounded-2xl border-2 border-b-4 border-slate-200 bg-white transition-all",
               "hover:bg-slate-50/80 focus-within:border-sky-400 focus-within:ring-2 focus-within:ring-sky-100",
-              isSentence ? "min-h-[76px] p-3" : "h-[68px] sm:h-[76px] px-3",
+              isSentence ? "min-h-[68px] sm:min-h-[76px] p-2.5 sm:p-3" : "h-[58px] sm:h-[72px] px-2 sm:px-3",
               errors?.arabic &&
                 "border-rose-400 bg-rose-50/30 focus-within:border-rose-400 focus-within:ring-rose-100",
             )}
@@ -349,7 +349,7 @@ export function VocabularyReviewDialog({
                 disabled={isSaving}
                 aria-label={`Arabic sentence ${index + 1}`}
                 placeholder="الجملة بالعربية..."
-                className="font-arabic w-full resize-none bg-transparent text-center text-lg font-bold text-neutral-800 placeholder:text-neutral-300 focus:outline-hidden sm:text-xl pr-10 pl-10"
+                className="font-arabic w-full resize-none bg-transparent text-center text-sm font-bold text-neutral-800 placeholder:text-neutral-300 focus:outline-hidden sm:text-base pl-8 pr-2 sm:pl-9 sm:pr-3"
                 rows={2}
                 maxLength={2400}
               />
@@ -366,7 +366,7 @@ export function VocabularyReviewDialog({
                 disabled={isSaving}
                 aria-label={`Arabic word ${index + 1}`}
                 placeholder="الكلمة..."
-                className="font-arabic w-full bg-transparent text-center text-2xl font-bold text-neutral-800 placeholder:text-neutral-300 focus:outline-hidden sm:text-3xl pr-10 pl-10"
+                className="font-arabic w-full bg-transparent text-center text-base font-bold text-neutral-800 placeholder:text-neutral-300 focus:outline-hidden sm:text-xl pl-8 pr-2 sm:pl-9 sm:pr-3"
                 maxLength={2400}
               />
             )}
@@ -380,11 +380,11 @@ export function VocabularyReviewDialog({
               }}
               aria-label={`Play pronunciation for ${entry.english || entry.arabic}`}
               className={cn(
-                "absolute left-2 sm:left-2.5 top-1/2 -translate-y-1/2 z-10 flex size-8 sm:size-9 items-center justify-center rounded-xl text-sky-500 transition hover:bg-sky-50 hover:text-sky-600 active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sky-400",
+                "absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2 z-10 flex size-7 sm:size-8 items-center justify-center rounded-lg sm:rounded-xl text-sky-500 transition hover:bg-sky-50 hover:text-sky-600 active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sky-400",
                 speakingId === entry.id && "animate-pulse text-sky-600 bg-sky-100/70",
               )}
             >
-              <Volume2 className="size-4.5 sm:size-5 stroke-[2.25]" aria-hidden="true" />
+              <Volume2 className="size-4 sm:size-4.5 stroke-[2.25]" aria-hidden="true" />
             </button>
           </div>
 
@@ -393,7 +393,7 @@ export function VocabularyReviewDialog({
             type="button"
             size="icon"
             variant="ghost"
-            className="h-10 w-10 shrink-0 rounded-xl text-slate-300 transition hover:bg-rose-50 hover:text-rose-500"
+            className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 rounded-xl text-slate-300 transition hover:bg-rose-50 hover:text-rose-500"
             disabled={isSaving}
             onClick={() => removeEntry(entry.id)}
             aria-label={`Remove ${entry.kind} ${index + 1}`}
@@ -509,7 +509,7 @@ export function VocabularyReviewDialog({
     >
       <DialogContent
         dir="ltr"
-        className="flex max-h-[88dvh] w-[calc(100%_-_2rem)] max-w-2xl sm:max-w-3xl flex-col gap-0 overflow-hidden rounded-3xl border-2 border-slate-200 bg-white p-0 shadow-2xl"
+        className="flex max-h-[88dvh] w-[calc(100%_-_1.25rem)] max-w-2xl sm:max-w-3xl flex-col gap-0 overflow-hidden rounded-3xl border-2 border-slate-200 bg-white p-0 shadow-2xl"
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           titleRef.current?.focus();
@@ -522,7 +522,7 @@ export function VocabularyReviewDialog({
         }}
       >
         {/* Header - Matching pairs practice style */}
-        <DialogHeader className="shrink-0 px-6 pt-6 pb-4 text-start sm:px-8">
+        <DialogHeader className="shrink-0 px-4 pt-5 pb-3 text-start sm:px-8 sm:pt-6 sm:pb-4">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
             <div>
               <DialogTitle
@@ -560,7 +560,7 @@ export function VocabularyReviewDialog({
 
 
           <ScrollArea className="h-[50dvh] min-h-0" dir="ltr">
-            <div className="flex min-w-0 flex-col gap-5 p-5 sm:p-6 sm:px-8">
+            <div className="flex min-w-0 flex-col gap-4 p-3.5 sm:gap-5 sm:p-6 sm:px-8">
               {words.length > 0 && (
                 <section
                   className="flex flex-col gap-3"
@@ -626,7 +626,7 @@ export function VocabularyReviewDialog({
           </ScrollArea>
 
           {/* Footer - Duolingo action bar */}
-          <div className="flex shrink-0 flex-col gap-3 border-t-2 border-slate-100 bg-slate-50/60 p-4 sm:px-8 sm:py-5">
+          <div className="flex shrink-0 flex-col gap-3 border-t-2 border-slate-100 bg-slate-50/60 p-3.5 sm:px-8 sm:py-5">
             {error && (
               <p role="alert" className="text-sm font-semibold text-destructive">
                 {error}

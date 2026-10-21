@@ -15,7 +15,7 @@
     "typecheck": "tsc --noEmit",
     "db:arabic": "tsx ./src/scripts/seed-arabic.ts",
     "test": "node --conditions=react-server --import tsx --test tests/vocabulary/*.test.ts",
-    "db:vocabulary": "tsx ./src/scripts/migrate-vocabulary.ts",
+    "db:vocabulary": "node -r dotenv/config --conditions=react-server --import tsx src/scripts/migrate-vocabulary.ts dotenv_config_path=.env.local",
     "test:gateway": "node --conditions=react-server --import tsx --test tests/vocabulary/gateway.integration.ts",
     "test:db": "node --conditions=react-server --import tsx --test tests/vocabulary/database.integration.ts"
   },

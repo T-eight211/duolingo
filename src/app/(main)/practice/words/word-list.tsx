@@ -124,6 +124,16 @@ export function WordList({ entries }: { entries: VocabularyEntry[] }) {
           grammar: grammarToSave,
         },
       }));
+      setExpandedWordIds((prev) => {
+        const next = new Set(prev);
+        next.delete(word.id);
+        return next;
+      });
+      setDraftGrammar((prev) => {
+        const next = { ...prev };
+        delete next[word.id];
+        return next;
+      });
       router.refresh();
     } catch {
       toast.error("Failed to save grammar changes.");
@@ -243,6 +253,11 @@ export function WordList({ entries }: { entries: VocabularyEntry[] }) {
                       {word.category && (
                         <span className="inline-flex items-center rounded-lg border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-xs font-bold text-sky-700">
                           {word.category}
+                        </span>
+                      )}
+                      {word.errorCount !== undefined && word.errorCount > 0 && (
+                        <span className="inline-flex items-center rounded-lg border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-bold text-rose-700">
+                          {word.errorCount} {word.errorCount === 1 ? "error" : "errors"}
                         </span>
                       )}
                     </div>

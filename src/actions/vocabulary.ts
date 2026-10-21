@@ -8,6 +8,7 @@ import db from "@/db/drizzle";
 import { userProgress } from "@/db/schema";
 
 import {
+  recordWordPracticeResults,
   saveUserVocabulary,
   updateWordCategory,
   updateWordGrammar,
@@ -272,6 +273,24 @@ export async function updateWordCategoryAction(
   } catch (err) {
     console.error("updateWordCategoryAction error:", err);
     return { success: false, error: "Failed to update category." };
+  }
+}
+
+export async function recordWordPracticeResultAction(params: {
+  mistakeWordIds?: string[];
+  cleanSuccessWordIds?: string[];
+}): Promise<{ success: boolean; error?: string }> {
+  const { userId } = await auth();
+  if (!userId) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  try {
+    await recordWordPracticeResults(userId, params);
+    return { success: true };
+  } catch (err) {
+    console.error("recordWordPracticeResultAction error:", err);
+    return { success: false, error: "Failed to record practice result" };
   }
 }
 

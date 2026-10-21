@@ -33,6 +33,8 @@ export default async function MatchingPage() {
     english: w.english,
     arabic: w.arabicDiacritized || w.arabic,
     audioSrc: w.audioSrc ?? null,
+    errorCount: w.errorCount ?? 0,
+    correctCount: w.correctCount ?? 0,
   }));
 
   const initialSessionPlan = createSessionPlan(pairs);

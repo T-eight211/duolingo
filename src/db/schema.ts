@@ -185,6 +185,9 @@ export const userVocabulary = pgTable(
     grammar: jsonb("grammar").$type<ArabicGrammar | null>(),
     audioSrc: text("audio_src"),
     category: text("category"),
+    errorCount: integer("error_count").notNull().default(0),
+    correctCount: integer("correct_count").notNull().default(0),
+    lastPracticedAt: timestamp("last_practiced_at", { withTimezone: true }),
     // SHA-256 of the normalized bilingual pair keeps sentence indexes bounded.
     normalizedKey: text("normalized_key").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -206,6 +209,11 @@ export const userVocabulary = pgTable(
     index("user_vocabulary_course_idx").on(table.courseId),
     index("user_vocabulary_pos_idx").on(table.courseId, table.partOfSpeech),
     index("user_vocabulary_category_idx").on(table.courseId, table.category),
+    index("user_vocabulary_error_idx").on(
+      table.userId,
+      table.courseId,
+      table.errorCount,
+    ),
     check(
       "user_vocabulary_kind_check",
       sql`${table.kind} IN ('word', 'phrase', 'sentence')`,

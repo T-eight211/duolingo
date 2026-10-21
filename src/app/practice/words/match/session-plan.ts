@@ -3,6 +3,8 @@ export type WordPair = {
   english: string;
   arabic: string;
   audioSrc?: string | null;
+  errorCount?: number;
+  correctCount?: number;
 };
 
 export type ExerciseType =
@@ -42,6 +44,26 @@ export function shuffle<T>(array: T[]): T[] {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+/**
+ * Weighted shuffle based on A-Res weighted random sampling:
+ * Words with higher errorCount receive higher weights and appear more frequently.
+ * Words with 0 errors stay at baseline weight 1, so learned words appear less frequently.
+ */
+export function weightedShuffle<T extends { errorCount?: number }>(
+  items: T[],
+): T[] {
+  return [...items]
+    .map((item) => {
+      const errorCount = Math.max(0, item.errorCount ?? 0);
+      const weight = 1 + errorCount * 2.5;
+      const u = Math.max(1e-6, Math.random());
+      const key = Math.pow(u, 1 / weight);
+      return { item, key };
+    })
+    .sort((a, b) => b.key - a.key)
+    .map((entry) => entry.item);
 }
 
 export const ALL_EXERCISE_TYPES: ExerciseType[] = [
@@ -148,12 +170,12 @@ export function createSessionPlan(words: WordPair[]): SessionPlan {
   // Always pick 3 distinct exercise types in a mixed/randomized order
   const selectedTypes = shuffle(ALL_EXERCISE_TYPES).slice(0, 3);
 
-  // Each stage draws an independent non-repeating pool from the available vocabulary
+  // Each stage draws from the vocabulary pool with weighted priority for error-prone words
   const stages: ExerciseStagePlan[] = selectedTypes.map((type) => {
     const { initial, swaps } = getStagePairCounts(type);
     const count = initial + swaps;
-    const shuffledWords = shuffle(words);
-    const pool = shuffledWords.slice(0, count);
+    const prioritizedWords = weightedShuffle(words);
+    const pool = prioritizedWords.slice(0, count);
     return createExerciseStage(type, pool);
   });
 

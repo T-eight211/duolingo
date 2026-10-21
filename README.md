@@ -72,6 +72,8 @@ cd duolingo-nextjs
 npm install
 ```
 
+Use npm for dependency changes and commit `package-lock.json` alongside `package.json`. Vercel detects npm from this lockfile; do not add a pnpm or Yarn lockfile.
+
 3. Create a .env File:
 
 - Create a .env file. Keep real credentials in .env, which is ignored by Git.

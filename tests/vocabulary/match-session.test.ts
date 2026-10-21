@@ -5,6 +5,7 @@ import {
   getStagePairCounts,
   createExerciseStage,
   createSessionPlan,
+  weightedShuffle,
   type WordPair,
 } from "@/app/practice/words/match/session-plan";
 
@@ -64,4 +65,40 @@ test("createSessionPlan creates 3 valid stages from vocabulary", () => {
       assert.equal(stage.rightKind, "arabic");
     }
   }
+});
+
+test("weightedShuffle prioritizes words with errors over mastered words", () => {
+  const highErrorWord: WordPair = {
+    id: "error-word",
+    english: "Difficult word",
+    arabic: "كلمة صعبة",
+    errorCount: 8,
+  };
+
+  const zeroErrorWords: WordPair[] = Array.from({ length: 20 }, (_, i) => ({
+    id: `mastered-${i + 1}`,
+    english: `Easy word ${i + 1}`,
+    arabic: `كلمة سهلة ${i + 1}`,
+    errorCount: 0,
+  }));
+
+  const allWords = [highErrorWord, ...zeroErrorWords];
+
+  // Run multiple trials to verify high-error word appears in top 5 significantly more often
+  let top5Count = 0;
+  const trials = 100;
+  for (let t = 0; t < trials; t++) {
+    const shuffled = weightedShuffle(allWords);
+    const top5Ids = shuffled.slice(0, 5).map((w) => w.id);
+    if (top5Ids.includes("error-word")) {
+      top5Count++;
+    }
+  }
+
+  // With 21 total words, uniform probability of appearing in top 5 is 5/21 ≈ 23.8%.
+  // With weight 21 vs 1, weighted probability of appearing in top 5 is > 85%.
+  assert.ok(
+    top5Count >= 65,
+    `Expected high error word to appear in top 5 in >= 65% of trials, got ${top5Count}%`,
+  );
 });

@@ -25,9 +25,13 @@ ALTER TABLE public.user_vocabulary ADD COLUMN IF NOT EXISTS part_of_speech text;
 ALTER TABLE public.user_vocabulary ADD COLUMN IF NOT EXISTS grammar jsonb;
 ALTER TABLE public.user_vocabulary ADD COLUMN IF NOT EXISTS audio_src text;
 ALTER TABLE public.user_vocabulary ADD COLUMN IF NOT EXISTS category text;
+ALTER TABLE public.user_vocabulary ADD COLUMN IF NOT EXISTS error_count integer NOT NULL DEFAULT 0;
+ALTER TABLE public.user_vocabulary ADD COLUMN IF NOT EXISTS correct_count integer NOT NULL DEFAULT 0;
+ALTER TABLE public.user_vocabulary ADD COLUMN IF NOT EXISTS last_practiced_at timestamptz;
 UPDATE storage.buckets SET public = true WHERE id = 'Duolingo Arabic Words Audio';
 CREATE INDEX IF NOT EXISTS user_vocabulary_pos_idx ON public.user_vocabulary(course_id, part_of_speech);
 CREATE INDEX IF NOT EXISTS user_vocabulary_category_idx ON public.user_vocabulary(course_id, category);
+CREATE INDEX IF NOT EXISTS user_vocabulary_error_idx ON public.user_vocabulary(user_id, course_id, error_count);
 CREATE TABLE IF NOT EXISTS public.user_vocabulary_links (
   user_id text NOT NULL,
   course_id integer NOT NULL,

@@ -9,7 +9,10 @@ import { useKey, useMedia, useWindowSize } from "react-use";
 import Confetti from "react-confetti";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { completeWordPracticeAction } from "@/actions/vocabulary";
+import {
+  completeWordPracticeAction,
+  recordWordPracticeResultAction,
+} from "@/actions/vocabulary";
 import { useExitModal } from "@/store/use-exit-modal";
 import styles from "./matching-exercise.module.css";
 import { cn } from "@/lib/utils";
@@ -83,6 +86,7 @@ export function MatchingExercise({
   const [listeningSkipped, setListeningSkipped] = useState(false);
   const [awardedPoints, setAwardedPoints] = useState(false);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const mistakenInStageRef = useRef<Set<string>>(new Set());
 
   // If user skipped listening, subsequent listening exercises gracefully adapt to text
   const effectiveIsListening = currentStage.isListening && !listeningSkipped;
@@ -184,6 +188,13 @@ export function MatchingExercise({
 
       if (!isCorrect) {
         setFeedback({ leftId: nextLeft, rightId: nextRight, correct: false });
+        mistakenInStageRef.current.add(nextLeft);
+        mistakenInStageRef.current.add(nextRight);
+        // Record mistake for both words asynchronously
+        recordWordPracticeResultAction({
+          mistakeWordIds: [nextLeft, nextRight],
+        }).catch(() => {});
+
         window.setTimeout(() => {
           setFeedback(null);
           setSelectedLeft(null);
@@ -194,6 +205,14 @@ export function MatchingExercise({
 
       // Correct match
       setFeedback({ leftId: nextLeft, rightId: nextRight, correct: true });
+
+      // If matched cleanly with 0 mistakes in this stage, record success to reduce error weight
+      const isClean = !mistakenInStageRef.current.has(nextLeft);
+      if (isClean) {
+        recordWordPracticeResultAction({
+          cleanSuccessWordIds: [nextLeft],
+        }).catch(() => {});
+      }
 
       const nextMatched = [...matched, nextLeft];
       setMatched(nextMatched);
@@ -258,6 +277,7 @@ export function MatchingExercise({
     setSelectedLeft(null);
     setSelectedRight(null);
     setIntermission(false);
+    mistakenInStageRef.current = new Set();
     setMotion({
       phase: "entering",
       ids: nextStage.initialPairs.map((p) => p.id),
