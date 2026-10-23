@@ -634,13 +634,13 @@ export function VocabularyReviewDialog({
             )}
 
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-bold text-neutral-600" aria-live="polite">
+              <p className="text-sm font-bold text-neutral-600 shrink-0 whitespace-nowrap sm:whitespace-normal" aria-live="polite">
                 <span className="text-neutral-800">
                   {newCount} {newCount === 1 ? "word" : "words"}
                 </span>{" "}
                 to add
                 {duplicateCount > 0 && (
-                  <span className="font-normal text-muted-foreground">
+                  <span className="hidden sm:inline font-normal text-muted-foreground">
                     {" "}
                     · {duplicateCount} already saved
                   </span>
