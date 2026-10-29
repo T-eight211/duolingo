@@ -12,7 +12,9 @@ export type ExerciseType =
   | "audio_ar"
   | "en_ar_cascade"
   | "en_ar_static"
-  | "en_ar_no_audio";
+  | "en_ar_no_audio"
+  | "type_english"
+  | "type_arabic";
 
 export type ExerciseSlotKind = "audio" | "english" | "arabic";
 
@@ -72,6 +74,8 @@ export const ALL_EXERCISE_TYPES: ExerciseType[] = [
   "en_ar_cascade",
   "en_ar_static",
   "en_ar_no_audio",
+  "type_english",
+  "type_arabic",
 ];
 
 export function getStagePairCounts(type: ExerciseType): {
@@ -79,6 +83,9 @@ export function getStagePairCounts(type: ExerciseType): {
   swaps: number;
 } {
   switch (type) {
+    case "type_english":
+    case "type_arabic":
+      return { initial: 10, swaps: 0 };
     case "en_ar_static":
       return { initial: 5, swaps: 0 };
     case "en_ar_no_audio":
@@ -110,6 +117,19 @@ export function createExerciseStage(
   };
 
   switch (type) {
+    case "type_english":
+    case "type_arabic":
+      return {
+        ...base,
+        title:
+          type === "type_arabic"
+            ? "Write the Arabic translation"
+            : "Write the English translation",
+        isListening: false,
+        hasAudio: false,
+        leftKind: type === "type_arabic" ? "english" : "arabic",
+        rightKind: type === "type_arabic" ? "arabic" : "english",
+      };
     case "audio_en":
       return {
         ...base,

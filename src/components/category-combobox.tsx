@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronDown, Plus } from "lucide-react";
+import { Check, ChevronDown, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const DEFAULT_CATEGORIES = [
@@ -26,6 +26,7 @@ interface CategoryComboboxProps {
   onValueChange?: (value: string) => void;
   existingCategories?: string[];
   disabled?: boolean;
+  clearable?: boolean;
   placeholder?: string;
   className?: string;
 }
@@ -36,6 +37,7 @@ export function CategoryCombobox({
   onValueChange,
   existingCategories = [],
   disabled = false,
+  clearable = false,
   placeholder = "Select or create category",
   className,
 }: CategoryComboboxProps) {
@@ -193,9 +195,14 @@ export function CategoryCombobox({
         <div className="absolute end-1.5 flex items-center">
           <button
             type="button"
-            tabIndex={-1}
+            tabIndex={clearable && value ? 0 : -1}
             disabled={disabled}
             onClick={() => {
+              if (clearable && value) {
+                handleSelect("");
+                inputRef.current?.focus();
+                return;
+              }
               if (isOpen) {
                 setIsOpen(false);
                 setHasUserTyped(false);
@@ -207,14 +214,14 @@ export function CategoryCombobox({
               }
             }}
             className="flex size-6 items-center justify-center rounded-md text-slate-400 hover:text-slate-600 transition"
-            aria-label="Toggle category list"
+            aria-label={clearable && value ? "Clear category" : "Toggle category list"}
           >
-            <ChevronDown
+            {clearable && value ? <X className="size-3.5 stroke-[2.5]" /> : <ChevronDown
               className={cn(
                 "size-3.5 transition-transform duration-200 stroke-[2.5]",
                 isOpen && "rotate-180",
               )}
-            />
+            />}
           </button>
         </div>
       </div>

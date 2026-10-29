@@ -34,6 +34,8 @@ export type {
   SessionPlan,
 };
 
+import { TypingExercise } from "./typing-exercise";
+
 const waveform = [5, 12, 22, 30, 25, 38, 29, 21, 13, 20, 12, 8, 5];
 
 export function MatchingExercise({
@@ -559,9 +561,18 @@ export function MatchingExercise({
             <p className="text-sm text-muted-foreground lg:text-base">
               {listeningSkipped
                 ? "Practice complete. Listening was skipped."
-                : `You matched all ${sessionMatched} words in this practice.`}
+                : `You practised ${sessionMatched} words in this practice.`}
             </p>
           </div>
+        ) : currentStage.type === "type_english" || currentStage.type === "type_arabic" ? (
+          <TypingExercise
+            key={`${stageIndex}-${currentStage.type}`}
+            stage={currentStage}
+            onAdvance={(id, last) => {
+              setMatched(previous => [...previous, id]);
+              if (last && stageIndex < 2) setIntermission(true);
+            }}
+          />
         ) : (
           <div className="flex w-full flex-col gap-y-3 px-6 lg:min-h-[350px] lg:w-[600px] lg:px-0">
             <h1 className="text-center text-lg font-bold text-neutral-700 lg:text-start lg:text-3xl">

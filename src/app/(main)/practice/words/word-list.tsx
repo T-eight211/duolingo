@@ -8,6 +8,7 @@ import { saveWordGrammarAction } from "@/actions/vocabulary";
 import { GrammarBadges } from "@/components/grammar/grammar-badges";
 import { GrammarEditor } from "@/components/grammar/grammar-editor";
 import { Button } from "@/components/ui/button";
+import { EditWordCategory } from "./edit-word-category";
 import { Spinner } from "@/components/ui/spinner";
 import type { ArabicGrammar } from "@/lib/grammar/types";
 import { cn } from "@/lib/utils";
@@ -120,6 +121,7 @@ export function WordList({ entries }: { entries: VocabularyEntry[] }) {
       setLocalOverrides((prev) => ({
         ...prev,
         [word.id]: {
+          ...prev[word.id],
           partOfSpeech: grammarToSave.part_of_speech,
           grammar: grammarToSave,
         },
@@ -250,11 +252,22 @@ export function WordList({ entries }: { entries: VocabularyEntry[] }) {
                       >
                         {word.arabicDiacritized || word.arabic}
                       </p>
-                      {word.category && (
-                        <span className="inline-flex items-center rounded-lg border border-sky-200 bg-sky-50 px-2.5 py-0.5 text-xs font-bold text-sky-700">
-                          {word.category}
-                        </span>
-                      )}
+                      <EditWordCategory
+                        wordId={word.id}
+                        english={word.english}
+                        category={word.category}
+                        categories={categories}
+                        onSaved={(category) => {
+                          setLocalOverrides((prev) => ({
+                            ...prev,
+                            [word.id]: { ...prev[word.id], category },
+                          }));
+                          if (selectedCategory !== "all" && category !== selectedCategory) {
+                            setSelectedCategory("all");
+                          }
+                          router.refresh();
+                        }}
+                      />
                       {word.errorCount !== undefined && word.errorCount > 0 && (
                         <span className="inline-flex items-center rounded-lg border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-bold text-rose-700">
                           {word.errorCount} {word.errorCount === 1 ? "error" : "errors"}

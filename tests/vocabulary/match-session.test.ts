@@ -55,8 +55,10 @@ test("createSessionPlan creates 3 valid stages from vocabulary", () => {
   assert.equal(plan.stages.length, 3);
   for (const stage of plan.stages) {
     assert.ok(stage.totalCount >= 5);
-    assert.equal(stage.initialSlots, 5);
-    assert.equal(stage.initialPairs.length, 5);
+    const typing =
+      stage.type === "type_arabic" || stage.type === "type_english";
+    assert.equal(stage.initialSlots, typing ? 10 : 5);
+    assert.equal(stage.initialPairs.length, typing ? 10 : 5);
     if (stage.type === "en_ar_no_audio") {
       assert.equal(stage.hasAudio, false);
       assert.equal(stage.extraPairs.length, 16);

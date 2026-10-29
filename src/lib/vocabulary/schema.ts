@@ -18,7 +18,9 @@ export const rawExtractionEntrySchema = z.object({
   id: z.string().min(1).max(100),
   kind: vocabularyKindSchema,
   arabic: z.string().trim().max(2000),
-  arabicDiacritized: z.string().trim().max(2400),
+  arabicDiacritized: z.string().trim().max(2400).describe(
+    "Fully diacritised Arabic preserving valid source marks, including final-letter vowels, tanwin, sukun, and shadda. Do not omit visible word endings for pause-form pronunciation. Flag uncertain missing endings for review instead of guessing.",
+  ),
   english: z.string().trim().max(2400),
   originalArabic: z.string().max(4000).nullable(),
   originalEnglish: z.string().max(4000).nullable(),
