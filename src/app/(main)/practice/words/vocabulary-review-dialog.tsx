@@ -115,7 +115,6 @@ export function VocabularyReviewDialog({
   }
 
   const sentences = entries.filter((entry) => entry.kind !== "word");
-  const words = entries.filter((entry) => entry.kind === "word");
   const existingKeys = new Set(existingEntries.map(vocabularyKey));
   const uniqueEntries = deduplicateVocabularyEntries(entries).entries;
   const newCount = uniqueEntries.filter(
@@ -561,17 +560,12 @@ export function VocabularyReviewDialog({
 
           <ScrollArea className="h-[50dvh] min-h-0" dir="ltr">
             <div className="flex min-w-0 flex-col gap-4 p-3.5 sm:gap-5 sm:p-6 sm:px-8">
-              {words.length > 0 && (
+              {entries.length > 0 && (
                 <section
                   className="flex flex-col gap-3"
                   aria-label="Vocabulary words"
                 >
-                  {sentences.length > 0 && (
-                    <h3 className="text-sm font-bold text-neutral-600">
-                      Words ({words.length})
-                    </h3>
-                  )}
-                  <ul className="flex flex-col gap-3">{words.map(renderRow)}</ul>
+                  <ul className="flex flex-col gap-3">{entries.map(renderRow)}</ul>
                   <Button
                     type="button"
                     variant="ghost"
@@ -581,31 +575,6 @@ export function VocabularyReviewDialog({
                   >
                     <Plus className="h-4 w-4" /> Add another word
                   </Button>
-                </section>
-              )}
-
-              {sentences.length > 0 && (
-                <section
-                  className="mt-2 flex flex-col gap-3"
-                  aria-label="Sentences and phrases"
-                >
-                  <h3 className="text-sm font-bold text-neutral-600">
-                    Sentences and phrases ({sentences.length})
-                  </h3>
-                  <ul className="flex flex-col gap-3">
-                    {sentences.map(renderRow)}
-                  </ul>
-                  {words.length === 0 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="w-full border-2 border-dashed border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50 font-bold h-12 rounded-2xl flex items-center justify-center gap-2"
-                      onClick={addNewWord}
-                      disabled={isSaving}
-                    >
-                      <Plus className="h-4 w-4" /> Add a word
-                    </Button>
-                  )}
                 </section>
               )}
 

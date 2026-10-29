@@ -75,7 +75,8 @@ CRITICAL RULE: THE ARABIC WORD IS THE PRIMARY SOURCE OF TRUTH (NEVER REPLACE THE
 
 CRITICAL RULES FOR PHRASES, COMPOUND EXPRESSIONS & NOT SEPARATING WORDS LITERALLY:
 - When extracting vocabulary from a sentence, conversation, or text, DO NOT mechanically or literally dissect multi-word expressions into individual isolated words if they naturally function together as a phrase, idiom, or unified grammatical unit.
-- If an expression normally comes as a phrase or is presented as a cohesive unit in the source material, keep it together as a single entry (kind='phrase'):
+- Default every vocabulary row to kind='word', including a single verb with a preposition only noted in parentheses, such as "استمع (إلى)" -> "he listened". Use kind='phrase' only when both are true: the expression normally functions as one phrase, and the source writes it as that phrase. Do not also create a separate sentence entry for it:
+
   1. Negative verb expressions & prohibitions: Keep negative particles paired with their verbs (e.g. "لاَ تَأْكُلْ" -> "don't eat", "لَمْ يَذْهَبْ" -> "didn't go", "لَنْ نَنْسَى" -> "we will not forget"). Do NOT split them into "لا" and "تأكل" separately.
   2. Idiomatic possession, negation & existence: Phrases like "لَيْسَ عِنْدِي" -> "I do not have" / "I don't have", "مَا عِنْدِي", "لَيْسَ هُنَاكَ" -> "there is no". Do NOT artificially separate "ليس" and "عندي" when they function together as "I don't have".
   3. Verb + preposition collocations: Where the preposition determines or completes the verb's meaning (e.g. "بَحَثَ عَنْ" -> "looked for / search for", "حَصَلَ عَلَى" -> "obtained / got", "تَوَقَّفَ عَنْ" -> "stopped doing"). Keep the verb and preposition together.
@@ -98,7 +99,7 @@ General bilingual extraction rules:
 
 For ambiguous handwriting, uncertain pairing, unclear spelling, or words with multiple plausible meanings, preserve the readable original instead of silently guessing. Set needsReview=true and provide a concise English reviewReason stating the uncertainty. If no translation can be chosen reliably, leave that translation blank so the user can complete it in review, and explain why. Do not put alternatives in separate entries as if they were certain. Do not claim certainty in diacritics when context is insufficient; flag the entry. Use warnings for unreadable/skipped source regions. If there is no readable Arabic learning material, return an empty entries array with the warning: "No Arabic text detected. Please upload an image containing Arabic notes, textbook pages, or vocabulary lists."
 
-Recognise whole phrases and complete sentences. Return their entire corrected text and natural translation using kind='phrase' or kind='sentence'. Also extract useful individual vocabulary from each phrase/sentence as kind='word', translated in that specific context. Handle attached prefixes, suffixes, and pronouns when identifying the useful learning word. The word's originalArabic/originalEnglish should retain its relevant source wording. Assign every entry a unique short id; word entries use sourceIds to reference all parent sentence/phrase ids from which they came. Phrases/sentences use an empty sourceIds array. Standalone words use an empty sourceIds array.
+Follow the phrase rule above. Do not build a separate sentence or phrase inventory, and do not mark an ordinary vocabulary row as kind='sentence'. When a real phrase is kept together, do not also split that same phrase into extra word entries. Handle attached prefixes, suffixes, and pronouns when identifying a learning word taken from running text. The word's originalArabic/originalEnglish should retain its relevant source wording. Assign every entry a unique short id. Word entries taken from a longer phrase may use sourceIds to reference that phrase. Standalone words use an empty sourceIds array.
 
 Consolidate only true duplicates: merge identical words that share the exact same meaning and tense across the upload, merging sourceIds so all sentence relationships survive. Keep different forms, tenses, or contextual meanings separate. Use no more than 100 entries total; if the source exceeds this limit, extract the first complete section that fits and add a warning asking the user to upload the remaining section separately.`;
 
@@ -149,8 +150,10 @@ export async function extractVocabulary(
     ? AbortSignal.any([options.abortSignal, timeout])
     : timeout;
   try {
-    const { output } = await generateText({
-      model: options.model ?? configuredModel(),
+    const model = options.model ?? configuredModel();
+    const imageParts = await vocabularyImageParts(upload);
+    const scan = async (recheck: boolean) => generateText({
+      model,
       output: Output.object({
         name: "ArabicEnglishVocabulary",
         description:
@@ -166,7 +169,11 @@ export async function extractVocabulary(
               type: "text",
               text: "Read the ENTIRE page, all rows and all side-by-side table blocks. For noun tables, include every written singular and plural as separate entries, using singular/plural English translations. Do not stop after the first few rows. Extract all Arabic-English learning material from this upload for review. STRICT REQUIREMENT: The upload MUST contain Arabic text or Arabic study notes. If no Arabic text is found in the upload (e.g. it is a random English paragraph, essay, receipt, or non-Arabic content), DO NOT attempt to translate it into Arabic; return an empty entries list (entries: []) with the warning 'No Arabic text detected. Please upload an image of your Arabic notes, textbook page, or vocabulary list.' PRIORITY RULE: The Arabic text in the document is the primary source of truth — NEVER replace or swap an Arabic word with a synonym or different root (e.g. keep 'جزى', do NOT change it to 'عوض'). If an English translation is written in the document and it is one of the possible meanings of the Arabic word, use that provided translation. Only change an English translation if it is completely wrong or unrelated. Do not append exclamation marks (!) to commands or any vocabulary words. Only if the document is actually a verb table or conjugation chart, extract each written form (such as past/الماضي, present/المضارع, imperative/الأمر, or masdar/المصدر) as its own entry. Do not assume that layout, and do not invent forms that are not on the page. For finite verbs (الماضي and المضارع), include the subject pronoun matching the conjugation (e.g. 'he worked', 'he works', 'he compensated'). For commands (الأمر), use direct base verbs without exclamation marks (e.g. 'work', 'compensate'). For verbal nouns (المصدر), use natural nouns/gerunds (e.g. 'working' / 'work', 'compensation'). Do not use bracketed tags like (past) or (present). When extracting from sentences or text, do not mechanically dissect natural multi-word phrases or idioms into isolated words (e.g. keep 'لا تأكل' / 'don't eat', 'ليس عندي' / 'I do not have' together as unified phrases). Keep translations concise (1 to 3 words) without generating full explanatory sentences. Follow the extraction rules and preserve original wording when correcting it.",
             },
-            ...await vocabularyImageParts(upload),
+            ...imageParts,
+            ...(recheck ? [{
+              type: "text" as const,
+              text: "Recheck this same upload carefully: the previous scan returned no verifiable Arabic source text. Inspect every image and table region again. Transcribe readable Arabic exactly into originalArabic, even when no spelling correction is needed. Do not invent Arabic for an English-only source. If it is still unreadable or contains no Arabic, return no entries and explain the uncertainty.",
+            }] : []),
           ],
         },
       ],
@@ -175,22 +182,20 @@ export async function extractVocabulary(
       maxOutputTokens: 24_000,
     });
 
-    const result = rawExtractionResultSchema.parse(output);
-    if (!result.entries.length) {
-      const arabicWarning = result.warnings.find((w) => /no arabic/i.test(w));
-      throw new VocabularyExtractionError(
-        arabicWarning ||
-          "No Arabic text detected. Please upload an image containing Arabic notes, textbook pages, or vocabulary lists.",
-        422,
-      );
-    }
-    const hasArabicInSource = result.entries.some(
+    const hasArabicInSource = (result: ExtractionResult) => result.entries.some(
       (entry) =>
         entry.originalArabic && /[\u0600-\u06FF]/.test(entry.originalArabic),
     );
-    if (!hasArabicInSource) {
+    let result = rawExtractionResultSchema.parse((await scan(false)).output);
+    if (!hasArabicInSource(result)) {
+      // SDK transport retries do not retry a successful but empty AI response.
+      // Reuse the same bytes and deadline; never restart an unbounded retry loop.
+      abortSignal.throwIfAborted();
+      result = rawExtractionResultSchema.parse((await scan(true)).output);
+    }
+    if (!hasArabicInSource(result)) {
       throw new VocabularyExtractionError(
-        "No Arabic text detected. Please upload an image containing Arabic notes, textbook pages, or vocabulary lists.",
+        "We couldn't reliably read Arabic from this upload after checking twice. Try a closer, clearer crop of the Arabic text.",
         422,
       );
     }

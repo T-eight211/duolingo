@@ -58,8 +58,7 @@ export function WordList({ entries }: { entries: VocabularyEntry[] }) {
     });
   }
 
-  const savedWords = entries.filter((entry) => entry.kind === "word");
-  const vocabulary = savedWords.map((word) => ({
+  const vocabulary = entries.map((word) => ({
     ...word,
     ...(localOverrides[word.id] || {}),
   }));
@@ -79,7 +78,6 @@ export function WordList({ entries }: { entries: VocabularyEntry[] }) {
       ? vocabulary
       : vocabulary.filter((w) => w.category === selectedCategory);
 
-  const sentences = entries.filter((entry) => entry.kind !== "word");
   const words =
     sort === "alphabetical"
       ? [...filteredWords].sort((a, b) => a.arabic.localeCompare(b.arabic, "ar"))
@@ -356,61 +354,6 @@ export function WordList({ entries }: { entries: VocabularyEntry[] }) {
           );
         })}
         </ul>
-      )}
-
-      {sentences.length > 0 && (
-        <section className="mt-8" aria-labelledby="sentences-heading">
-          <h2
-            id="sentences-heading"
-            className="mb-4 text-xl font-bold text-neutral-800"
-          >
-            Sentences and phrases ({sentences.length})
-          </h2>
-          <ul className="divide-y-2 overflow-hidden rounded-xl border-2 border-b-4 bg-white">
-            {sentences.map((sentence) => (
-              <li key={sentence.id} className="min-w-0 p-5">
-                <p
-                  lang="ar"
-                  dir="rtl"
-                  className="text-xl leading-relaxed font-bold break-words"
-                >
-                  {sentence.arabicDiacritized || sentence.arabic}
-                </p>
-                <p
-                  lang="en"
-                  dir="ltr"
-                  className="mt-2 break-words text-muted-foreground"
-                >
-                  {sentence.english}
-                </p>
-                {savedWords.some((word) =>
-                  word.sourceIds.includes(sentence.id),
-                ) && (
-                  <details className="mt-3 text-sm">
-                    <summary className="cursor-pointer font-semibold">
-                      Words from this sentence
-                    </summary>
-                    <ul className="mt-2 flex flex-col gap-2">
-                      {savedWords
-                        .filter((word) => word.sourceIds.includes(sentence.id))
-                        .map((word) => (
-                          <li key={word.id}>
-                            <span lang="ar" dir="rtl">
-                              {word.arabicDiacritized}
-                            </span>
-                            <span className="text-muted-foreground">
-                              {" "}
-                              - {word.english}
-                            </span>
-                          </li>
-                        ))}
-                    </ul>
-                  </details>
-                )}
-              </li>
-            ))}
-          </ul>
-        </section>
       )}
     </section>
   );

@@ -12,6 +12,7 @@ http
       return send(501, { error: "Not modelled" });
     const model = req.headers["ai-language-model-id"];
     const body = req.body;
+    const recheck = JSON.stringify(body?.prompt).includes("Recheck this same upload carefully");
     const file = body?.prompt
       ?.flatMap((message) =>
         Array.isArray(message.content) ? message.content : [],
@@ -75,6 +76,10 @@ http
     };
     if (model === "test/empty")
       result = { entries: [], warnings: ["Nothing readable"] };
+    if (model === "test/empty-first" && !recheck)
+      result = { entries: [], warnings: ["No Arabic text detected"] };
+    if (model === "test/missing-source-first" && !recheck)
+      result.entries = result.entries.map((entry) => ({ ...entry, originalArabic: null }));
     if (model === "test/invalid") result = { entries: [{ arabic: 1 }] };
     if (model === "test/ids") result.entries[2].id = "w";
     if (model === "test/uncertain")

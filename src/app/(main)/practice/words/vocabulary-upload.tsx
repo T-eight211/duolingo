@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Plus, ScanLine } from "lucide-react";
+import { Plus, ScanLine } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,16 +46,13 @@ export function VocabularyUpload({
     const controller = new AbortController();
     requestRef.current = controller;
     setExtracting(true);
-    setProgress(15);
+    setProgress(5);
     setError(null);
     const progressInterval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev < 40) return prev + 6;
-        if (prev < 70) return prev + 3;
-        if (prev < 85) return prev + 1.5;
-        if (prev < 95) return prev + 0.5;
-        return prev;
-      });
+      // Estimated progress: allow for long AI scans without racing to the end.
+      // Only a successful response below completes the bar.
+      const elapsedMs = performance.now() - startedAt;
+      setProgress(5 + 90 * (1 - Math.exp(-elapsedMs / 60_000)));
     }, 200);
     const timeout = setTimeout(() => controller.abort("timeout"), 290_000);
     try {
@@ -204,19 +201,9 @@ export function VocabularyUpload({
             disabled={extracting}
             onClick={handleOpenManual}
           >
-            {extracting ? (
-              <span
-                className="absolute inset-y-0 left-0 bg-emerald-500 transition-[width] duration-200 ease-out"
-                style={{ width: `${progress}%` }}
-              />
-            ) : null}
             <span className="relative z-10 flex items-center justify-center gap-2">
-              {extracting ? (
-                <Check className="h-5 w-5" />
-              ) : (
-                <Plus className="h-5 w-5" aria-hidden="true" />
-              )}
-              {extracting ? "Processing..." : "Add words"}
+              <Plus className="h-5 w-5" aria-hidden="true" />
+              {extracting && !cropSource ? "Processing..." : "Add words"}
             </span>
           </Button>
           <button

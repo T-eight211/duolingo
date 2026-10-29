@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import test, { before } from "node:test";
 import { createGateway } from "ai";
+import sharp from "sharp";
 import {
   extractVocabulary,
   VocabularyExtractionError,
@@ -12,12 +13,23 @@ const gateway = createGateway({
   baseURL: "http://127.0.0.1:4911/gateway",
 });
 const image: VocabularyUpload = {
-  data: new Uint8Array([1, 2, 3]),
+  data: new Uint8Array(),
   mediaType: "image/jpeg",
   name: "fixture.jpg",
 };
+before(async () => {
+  image.data = await sharp({ create: { width: 8, height: 8, channels: 3, background: "white" } }).jpeg().toBuffer();
+});
 const status = (code: number) => (error: unknown) =>
   error instanceof VocabularyExtractionError && error.status === code;
+
+test("empty or missing-source first scans are rechecked automatically", async () => {
+  for (const name of ["empty-first", "missing-source-first"]) {
+    const result = await extractVocabulary(image, { model: gateway(`test/${name}`) });
+    assert.equal(result.entries.length, 2);
+    assert.equal(result.entries[1].originalArabic, "كتاب");
+  }
+});
 
 test("real SDK sends image/PDF structured-output requests and merges duplicate sentence links", async () => {
   for (const upload of [
@@ -37,7 +49,7 @@ test("real SDK sends image/PDF structured-output requests and merges duplicate s
 test("unreadable, invalid and conflicting AI responses become useful errors", async () => {
   await assert.rejects(
     extractVocabulary(image, { model: gateway("test/empty") }),
-    status(422),
+    (error: unknown) => status(422)(error) && error instanceof Error && /checking twice/.test(error.message),
   );
   await assert.rejects(
     extractVocabulary(image, { model: gateway("test/invalid") }),

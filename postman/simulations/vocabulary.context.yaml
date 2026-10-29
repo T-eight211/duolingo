@@ -1,0 +1,12 @@
+purpose:
+  stands_in_for: Vercel AI Gateway structured vocabulary extraction, using locally authored synthetic responses.
+  unblocks: Verify extraction recovery and error handling without live uploads or provider calls.
+assumptions:
+  - id: recheck-recovers-empty-scan
+    status: unknown
+    claim: A second scan of the same upload may recover an empty result or missing originalArabic fields.
+    reason: The user reports successful manual retries. Synthetic responses verify caller recovery but do not establish why the live first scan fails or guarantee recovery.
+    verification: On 2026-10-29, four gateway integration tests passed against the local Postman simulation. Request events confirmed the real SDK reached the mock. Empty-first and missing-source-first cases recovered; persistently empty output returned 422 with an uncertainty message. Access failures, rate limits, and a deadline were also exercised. The 21 unit tests, typecheck, and targeted lint passed. Live iPhone behavior remains unverified.
+    source: tests/vocabulary/gateway.integration.ts; postman/mocks/vocabulary-gateway/default.js; src/lib/vocabulary/extract.ts
+    updated_at: "2026-10-29"
+fingerprints: []
