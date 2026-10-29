@@ -9,6 +9,7 @@ import {
   extractionResultSchema,
   type VocabularyEntry,
 } from "@/lib/vocabulary/schema";
+import { VocabularyCropDialog } from "./vocabulary-crop-dialog";
 import { VocabularyReviewDialog } from "./vocabulary-review-dialog";
 
 export function VocabularyUpload({
@@ -16,6 +17,8 @@ export function VocabularyUpload({
 }: {
   existingEntries: VocabularyEntry[];
 }) {
+  const [cropSource, setCropSource] = useState<{ file: File; url: string } | null>(null);
+  useEffect(() => () => { if (cropSource) URL.revokeObjectURL(cropSource.url); }, [cropSource]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const requestRef = useRef<AbortController | null>(null);
   const [extracting, setExtracting] = useState(false);
@@ -87,6 +90,7 @@ export function VocabularyUpload({
       setEntries(result.data.entries);
       setWarnings(result.data.warnings);
       setReviewVersion((version) => version + 1);
+      setCropSource(null);
       setOpen(true);
     } catch (caught) {
       if (
@@ -115,7 +119,19 @@ export function VocabularyUpload({
   function selected(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
-    void upload(file);
+    if (!file || requestRef.current) return;
+    setError(null);
+    if (file.size === 0 || file.size > 20 * 1024 * 1024) {
+      toast.error(file.size === 0 ? "This file is empty." : "Choose a file smaller than 20 MB.");
+      return;
+    }
+    if (file.type === "application/pdf" || /\.pdf$/i.test(file.name)) {
+      void upload(file);
+    } else if (file.type.startsWith("image/") || /\.(jpe?g|png|webp)$/i.test(file.name)) {
+      setCropSource({ file, url: URL.createObjectURL(file) });
+    } else {
+      toast.error("Choose an image or PDF.");
+    }
   }
 
   function discard() {
@@ -205,6 +221,17 @@ export function VocabularyUpload({
             <ScanLine className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
+      )}
+      {cropSource && (
+        <VocabularyCropDialog
+          key={cropSource.url}
+          source={cropSource}
+          busy={extracting}
+          progress={progress}
+          error={error}
+          onClose={() => { setCropSource(null); setError(null); }}
+          onConfirm={upload}
+        />
       )}
       <VocabularyReviewDialog
         key={reviewVersion}
