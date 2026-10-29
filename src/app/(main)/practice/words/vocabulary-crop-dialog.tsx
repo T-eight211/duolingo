@@ -43,7 +43,14 @@ export function VocabularyCropDialog({ source, busy, progress, error, onClose, o
       context.fillStyle = "white";
       context.fillRect(0, 0, canvas.width, canvas.height);
       context.drawImage(image, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
-      const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error("Could not crop this image.")), "image/jpeg", 0.95));
+      const encode = (quality: number) => new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error("Could not crop this image.")), "image/jpeg", quality));
+      let blob = await encode(0.95);
+      // Leave room for multipart headers below Vercel's 4.5 MB request limit.
+      for (const quality of [0.85, 0.75, 0.65]) {
+        if (blob.size <= 4_000_000) break;
+        blob = await encode(quality);
+      }
+      if (blob.size > 4_000_000) throw new Error("This crop is too large to upload. Select a smaller section of the page.");
       await onConfirm(new File([blob], "vocabulary-crop.jpg", { type: "image/jpeg" }));
     } catch (caught) {
       setLocalError(caught instanceof Error ? caught.message : "Could not crop this image.");
@@ -60,7 +67,7 @@ export function VocabularyCropDialog({ source, busy, progress, error, onClose, o
           <DialogTitle>Crop your photo</DialogTitle>
           <DialogDescription>Drag the edges or corners to select the words you want to scan.</DialogDescription>
         </DialogHeader>
-        <div className="mx-auto flex aspect-[9/16] w-full max-w-[min(100%,30vh)] items-center justify-center overflow-hidden rounded-xl bg-muted" dir="ltr">
+        <div className="mx-auto flex aspect-[3/4] w-full max-w-[min(100%,40vh)] items-center justify-center overflow-hidden rounded-xl bg-muted" dir="ltr">
           <ReactCrop crop={crop} onChange={(_, percent) => setCrop(percent)} disabled={processing} keepSelection minWidth={12} minHeight={12} className="max-w-full">
             {/* Local blob preview must retain natural dimensions for canvas cropping. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}

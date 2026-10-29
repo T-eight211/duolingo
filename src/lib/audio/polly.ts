@@ -62,6 +62,7 @@ export function getPublicAudioUrl(key: string): string {
  */
 export async function synthesizeAndUploadWordAudio(
   arabicText: string,
+  abortSignal?: AbortSignal,
 ): Promise<string | null> {
   const trimmed = arabicText.trim();
   if (!trimmed || !/[\u0600-\u06ff]/.test(trimmed)) {
@@ -94,9 +95,11 @@ export async function synthesizeAndUploadWordAudio(
         Bucket: bucket,
         Key: key,
       }),
+      { abortSignal },
     );
     return getPublicAudioUrl(key);
   } catch {
+    if (abortSignal?.aborted) return null;
     // File does not exist yet; proceed to synthesize
   }
 
@@ -111,6 +114,7 @@ export async function synthesizeAndUploadWordAudio(
         Text: trimmed,
         TextType: "text",
       }),
+      { abortSignal },
     );
 
     if (!pollyResponse.AudioStream) {
@@ -129,10 +133,12 @@ export async function synthesizeAndUploadWordAudio(
         ContentType: "audio/mpeg",
         CacheControl: "public, max-age=31536000, immutable",
       }),
+      { abortSignal },
     );
 
     return getPublicAudioUrl(key);
   } catch (err) {
+    if (abortSignal?.aborted) return null;
     console.error(`Failed to synthesize audio for "${trimmed}":`, err);
     return null;
   }
@@ -144,6 +150,7 @@ export async function synthesizeAndUploadWordAudio(
  */
 export async function generateVocabularyAudio(
   entries: VocabularyEntry[],
+  abortSignal?: AbortSignal,
 ): Promise<VocabularyEntry[]> {
   const polly = getPollyClient();
   const s3 = getS3Client();
@@ -156,7 +163,7 @@ export async function generateVocabularyAudio(
       if (!textToSpeak) return entry;
 
       try {
-        const audioSrc = await synthesizeAndUploadWordAudio(textToSpeak);
+        const audioSrc = await synthesizeAndUploadWordAudio(textToSpeak, abortSignal);
         return { ...entry, audioSrc: audioSrc ?? entry.audioSrc ?? null };
       } catch (err) {
         console.error(`Audio generation error for entry "${entry.arabic}":`, err);

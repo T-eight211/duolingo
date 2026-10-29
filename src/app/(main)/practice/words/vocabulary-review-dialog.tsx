@@ -633,8 +633,8 @@ export function VocabularyReviewDialog({
               </p>
             )}
 
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-bold text-neutral-600 shrink-0 whitespace-nowrap sm:whitespace-normal" aria-live="polite">
+            <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="min-w-0 text-sm font-bold text-neutral-600" aria-live="polite">
                 <span className="text-neutral-800">
                   {newCount} {newCount === 1 ? "word" : "words"}
                 </span>{" "}
@@ -647,10 +647,11 @@ export function VocabularyReviewDialog({
                 )}
               </p>
 
-              <DialogFooter className="flex-row items-center gap-2 sm:gap-3">
+              <DialogFooter className="w-full min-w-0 flex-row items-center gap-2 sm:w-auto sm:gap-3">
                 <Button
                   type="button"
                   variant="ghost"
+                  className="min-w-0 flex-1 sm:flex-none"
                   disabled={isSaving}
                   onClick={() => onOpenChange(false)}
                 >
@@ -661,7 +662,7 @@ export function VocabularyReviewDialog({
                   variant="secondary"
                   size="lg"
                   disabled={isSaving || entries.length === 0}
-                  className="min-w-[130px] font-bold"
+                  className="min-w-0 flex-1 px-4 font-bold sm:min-w-[130px] sm:flex-none"
                 >
                   {isSaving && (
                     <Spinner data-icon="inline-start" aria-hidden="true" />

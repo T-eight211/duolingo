@@ -42,6 +42,7 @@ export function VocabularyUpload({
       toast.error(message);
       return;
     }
+    const startedAt = performance.now();
     const controller = new AbortController();
     requestRef.current = controller;
     setExtracting(true);
@@ -56,7 +57,7 @@ export function VocabularyUpload({
         return prev;
       });
     }, 200);
-    const timeout = setTimeout(() => controller.abort("timeout"), 110_000);
+    const timeout = setTimeout(() => controller.abort("timeout"), 290_000);
     try {
       const form = new FormData();
       form.append("file", file);
@@ -97,8 +98,16 @@ export function VocabularyUpload({
         !controller.signal.aborted ||
         controller.signal.reason === "timeout"
       ) {
+        console.warn("Vocabulary upload failed", {
+          elapsedMs: Math.round(performance.now() - startedAt),
+          uploadBytes: file.size,
+          aborted: controller.signal.aborted,
+          errorType: caught instanceof Error ? caught.name : "UnknownError",
+        });
         const message = controller.signal.aborted
           ? "Extraction took too long. Try a smaller document or clearer image."
+          : caught instanceof TypeError
+            ? "The connection was interrupted while scanning. Keep this page open and try Confirm again; your crop is still here."
           : caught instanceof Error
             ? caught.message
             : "The upload failed. Please try again.";

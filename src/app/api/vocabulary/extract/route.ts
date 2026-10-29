@@ -15,7 +15,7 @@ import { analyzeVocabularyGrammar } from "@/lib/grammar/analyze";
 import { generateVocabularyAudio } from "@/lib/audio/polly";
 
 export const runtime = "nodejs";
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 export async function POST(request: Request) {
   try {
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     // Step 4: AI identifies grammatical characteristics using the grammar JSON
     try {
       result.entries = await analyzeVocabularyGrammar(result.entries, {
-        abortSignal: request.signal,
+        abortSignal: AbortSignal.any([request.signal, AbortSignal.timeout(90_000)]),
       });
     } catch (grammarErr) {
       console.error("Vocabulary grammar analysis failed:", grammarErr);
@@ -58,7 +58,10 @@ export async function POST(request: Request) {
 
     // Step 5: Synthesize Arabic audio for extracted words with AWS Polly & upload to Supabase S3
     try {
-      result.entries = await generateVocabularyAudio(result.entries);
+      result.entries = await generateVocabularyAudio(
+        result.entries,
+        AbortSignal.any([request.signal, AbortSignal.timeout(60_000)]),
+      );
     } catch (audioErr) {
       console.error("Vocabulary audio generation failed:", audioErr);
     }

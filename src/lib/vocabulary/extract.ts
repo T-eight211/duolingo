@@ -18,6 +18,7 @@ import {
   type ExtractionResult,
 } from "./schema";
 import type { VocabularyUpload } from "./upload";
+import { vocabularyImageParts } from "./image-parts";
 
 // Verified against the AI Gateway catalog: image, PDF, structured output on standard tier.
 export const DEFAULT_VOCABULARY_MODEL = "openai/gpt-4o";
@@ -36,6 +37,14 @@ CRITICAL REQUIREMENT: THE SOURCE MATERIAL MUST CONTAIN ARABIC TEXT:
   2. DO NOT extract arbitrary English words and generate Arabic translations for them.
   3. Instead, return an empty entries array (entries: []) and provide this exact message in warnings:
      "No Arabic text detected. Please upload an image containing Arabic notes, textbook pages, or vocabulary lists."
+
+COMPLETE PAGE COVERAGE, INCLUDING NOUN TABLES:
+- Extract ALL readable vocabulary across the entire page, top to bottom, including the last row and every side-by-side table. Never return just a sample or the first 5 or 10 words. The limit is 100 entries, not 5 or 10.
+- First identify all table blocks and their headers. Independently read every row in each block; repeated headers often indicate separate tables, not duplicate material. Keep English translations associated with the Arabic cells in their own block, even if the column order is reversed.
+- For noun tables with مفرد (singular) and جمع (plural), extract BOTH written forms as separate word entries. Translate singulars as singular and plurals as plural (e.g. book / books). A shared English label applies to both forms with the appropriate number. Do not collapse singular and plural into one lemma.
+- If a cell explicitly contains multiple Arabic alternatives separated by a slash, extract each written alternative separately with its translation. Do not invent alternatives or forms absent from the source.
+- Before finishing, check each table block against the output: every readable Arabic vocabulary cell in every row must be represented. Mention unreadable or skipped regions in warnings; do not silently stop early. Exclude column headings from vocabulary.
+- Additional images, when supplied, are overlapping top, middle, and bottom close-ups of the SAME page. Use the full image for layout and the close-ups to read small letters and vowel marks. Extract the page once; overlap is not additional vocabulary.
 
 CRITICAL RULES FOR ARABIC VERB TABLES & MORPHOLOGICAL VARIATIONS:
 - Apply this section ONLY when the upload is actually a verb table, conjugation chart, or list whose columns or labels show morphological forms (such as الماضي / past, المضارع / present, الأمر / imperative, or المصدر / verbal noun). Most uploads are not in this format. Word lists, handwritten notes, textbook sentences, dialogues, and bilingual pairs must be extracted as written. Do NOT invent missing tenses or force every word into a الماضي / المضارع / الأمر / المصدر set.
@@ -155,14 +164,9 @@ export async function extractVocabulary(
           content: [
             {
               type: "text",
-              text: "Extract all Arabic-English learning material from this upload for review. STRICT REQUIREMENT: The upload MUST contain Arabic text or Arabic study notes. If no Arabic text is found in the upload (e.g. it is a random English paragraph, essay, receipt, or non-Arabic content), DO NOT attempt to translate it into Arabic; return an empty entries list (entries: []) with the warning 'No Arabic text detected. Please upload an image of your Arabic notes, textbook page, or vocabulary list.' PRIORITY RULE: The Arabic text in the document is the primary source of truth — NEVER replace or swap an Arabic word with a synonym or different root (e.g. keep 'جزى', do NOT change it to 'عوض'). If an English translation is written in the document and it is one of the possible meanings of the Arabic word, use that provided translation. Only change an English translation if it is completely wrong or unrelated. Do not append exclamation marks (!) to commands or any vocabulary words. Only if the document is actually a verb table or conjugation chart, extract each written form (such as past/الماضي, present/المضارع, imperative/الأمر, or masdar/المصدر) as its own entry. Do not assume that layout, and do not invent forms that are not on the page. For finite verbs (الماضي and المضارع), include the subject pronoun matching the conjugation (e.g. 'he worked', 'he works', 'he compensated'). For commands (الأمر), use direct base verbs without exclamation marks (e.g. 'work', 'compensate'). For verbal nouns (المصدر), use natural nouns/gerunds (e.g. 'working' / 'work', 'compensation'). Do not use bracketed tags like (past) or (present). When extracting from sentences or text, do not mechanically dissect natural multi-word phrases or idioms into isolated words (e.g. keep 'لا تأكل' / 'don't eat', 'ليس عندي' / 'I do not have' together as unified phrases). Keep translations concise (1 to 3 words) without generating full explanatory sentences. Follow the extraction rules and preserve original wording when correcting it.",
+              text: "Read the ENTIRE page, all rows and all side-by-side table blocks. For noun tables, include every written singular and plural as separate entries, using singular/plural English translations. Do not stop after the first few rows. Extract all Arabic-English learning material from this upload for review. STRICT REQUIREMENT: The upload MUST contain Arabic text or Arabic study notes. If no Arabic text is found in the upload (e.g. it is a random English paragraph, essay, receipt, or non-Arabic content), DO NOT attempt to translate it into Arabic; return an empty entries list (entries: []) with the warning 'No Arabic text detected. Please upload an image of your Arabic notes, textbook page, or vocabulary list.' PRIORITY RULE: The Arabic text in the document is the primary source of truth — NEVER replace or swap an Arabic word with a synonym or different root (e.g. keep 'جزى', do NOT change it to 'عوض'). If an English translation is written in the document and it is one of the possible meanings of the Arabic word, use that provided translation. Only change an English translation if it is completely wrong or unrelated. Do not append exclamation marks (!) to commands or any vocabulary words. Only if the document is actually a verb table or conjugation chart, extract each written form (such as past/الماضي, present/المضارع, imperative/الأمر, or masdar/المصدر) as its own entry. Do not assume that layout, and do not invent forms that are not on the page. For finite verbs (الماضي and المضارع), include the subject pronoun matching the conjugation (e.g. 'he worked', 'he works', 'he compensated'). For commands (الأمر), use direct base verbs without exclamation marks (e.g. 'work', 'compensate'). For verbal nouns (المصدر), use natural nouns/gerunds (e.g. 'working' / 'work', 'compensation'). Do not use bracketed tags like (past) or (present). When extracting from sentences or text, do not mechanically dissect natural multi-word phrases or idioms into isolated words (e.g. keep 'لا تأكل' / 'don't eat', 'ليس عندي' / 'I do not have' together as unified phrases). Keep translations concise (1 to 3 words) without generating full explanatory sentences. Follow the extraction rules and preserve original wording when correcting it.",
             },
-            {
-              type: "file",
-              data: upload.data,
-              mediaType: upload.mediaType,
-              filename: upload.name,
-            },
+            ...await vocabularyImageParts(upload),
           ],
         },
       ],
