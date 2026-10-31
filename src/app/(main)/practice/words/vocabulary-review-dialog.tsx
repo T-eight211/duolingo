@@ -70,7 +70,7 @@ export function VocabularyReviewDialog({
   );
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
-  const [category, setCategory] = useState<string>("Lesson 1");
+  const [category, setCategory] = useState<string>("Chapter 1");
 
   const allExistingCategories = Array.from(
     new Set(
@@ -541,7 +541,7 @@ export function VocabularyReviewDialog({
                 onValueChange={setCategory}
                 existingCategories={allExistingCategories}
                 disabled={isSaving}
-                placeholder="Category (e.g. Lesson 1)"
+                placeholder="Category (e.g. Chapter 1)"
               />
             </div>
           </div>

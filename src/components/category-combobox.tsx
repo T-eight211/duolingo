@@ -5,9 +5,9 @@ import { Check, ChevronDown, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const DEFAULT_CATEGORIES = [
-  "Lesson 1",
-  "Lesson 2",
-  "Lesson 3",
+  "Chapter 1",
+  "Chapter 2",
+  "Chapter 3",
   "General Vocabulary",
   "Verbs",
   "Grammar",
