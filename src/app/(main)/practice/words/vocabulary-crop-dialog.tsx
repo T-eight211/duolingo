@@ -77,7 +77,7 @@ export function VocabularyCropDialog({ source, busy, progress, error, onClose, o
         {(localError || error) && <p role="alert" className="text-sm text-destructive">{localError || error}</p>}
         <DialogFooter>
           <Button type="button" variant="primary" size="lg" className="relative w-full overflow-hidden disabled:opacity-100" disabled={processing || !ready || !crop.width || !crop.height} onClick={confirm} aria-busy={processing}>
-            {processing && <span aria-hidden="true" className="absolute inset-y-0 left-0 bg-emerald-500 transition-[width] duration-200 ease-out" style={{ width: `${progress || 5}%` }} />}
+            {processing && <span aria-hidden="true" className="absolute inset-y-0 left-0 bg-emerald-500 transition-[width] duration-200 ease-out" style={{ width: `${progress || 15}%` }} />}
             <span className="relative">{processing ? "Processing..." : "Confirm"}</span>
           </Button>
         </DialogFooter>

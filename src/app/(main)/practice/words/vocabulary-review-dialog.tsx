@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, Check, ChevronDown, Plus, Trash2, Volume2 } from "lucide-react";
 import { toast } from "sonner";
@@ -18,7 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { GrammarBadges } from "@/components/grammar/grammar-badges";
 import { GrammarEditor } from "@/components/grammar/grammar-editor";
-import { CategoryCombobox } from "@/components/category-combobox";
+import { WordTagsInput } from "@/components/word-tags-input";
 import type { ArabicGrammar } from "@/lib/grammar/types";
 import { cn } from "@/lib/utils";
 import {
@@ -70,17 +70,20 @@ export function VocabularyReviewDialog({
   );
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
-  const [category, setCategory] = useState<string>("Chapter 1");
+  const [tags, setTags] = useState<string[]>(["Chapter 1"]);
 
-  const allExistingCategories = Array.from(
-    new Set(
-      existingEntries
-        .map((e) => e.category)
-        .filter(
-          (c): c is string => typeof c === "string" && c.trim().length > 0,
-        ),
-    ),
-  );
+  const allExistingCategories = useMemo(() => {
+    return Array.from(
+      new Set(
+        existingEntries
+          .flatMap((e) => (e.category ? e.category.split(",") : []))
+          .map((c) => c.trim())
+          .filter((c) => c.length > 0),
+      ),
+    ).sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" }),
+    );
+  }, [existingEntries]);
 
   function playAudio(entry: VocabularyEntry) {
     if (typeof window === "undefined") return;
@@ -190,7 +193,8 @@ export function VocabularyReviewDialog({
 
   function submit() {
     if (savingRef.current || entries.length === 0) return;
-    const cleanCategory = category.trim() || null;
+    const cleanCategory =
+      tags.map((t) => t.trim()).filter(Boolean).join(", ") || null;
     const entriesWithCategory = entries.map((entry) => ({
       ...entry,
       category: entry.category || cleanCategory,
@@ -320,7 +324,7 @@ export function VocabularyReviewDialog({
                 disabled={isSaving}
                 aria-label={`English word ${index + 1}`}
                 placeholder="English..."
-                className="w-full bg-transparent text-center text-sm font-bold text-neutral-700 placeholder:text-neutral-300 focus:outline-hidden sm:text-base px-1.5"
+                className="w-full bg-transparent text-center text-xs font-bold text-neutral-700 placeholder:text-neutral-300 focus:outline-hidden sm:text-base px-1"
                 maxLength={2400}
               />
             )}
@@ -348,7 +352,7 @@ export function VocabularyReviewDialog({
                 disabled={isSaving}
                 aria-label={`Arabic sentence ${index + 1}`}
                 placeholder="الجملة بالعربية..."
-                className="font-arabic w-full resize-none bg-transparent text-center text-sm font-bold text-neutral-800 placeholder:text-neutral-300 focus:outline-hidden sm:text-base pl-8 pr-2 sm:pl-9 sm:pr-3"
+                className="font-arabic w-full resize-none bg-transparent text-center text-xs font-bold text-neutral-800 placeholder:text-neutral-300 focus:outline-hidden sm:text-base pl-7 pr-1.5 sm:pl-9 sm:pr-3"
                 rows={2}
                 maxLength={2400}
               />
@@ -365,7 +369,7 @@ export function VocabularyReviewDialog({
                 disabled={isSaving}
                 aria-label={`Arabic word ${index + 1}`}
                 placeholder="الكلمة..."
-                className="font-arabic w-full bg-transparent text-center text-base font-bold text-neutral-800 placeholder:text-neutral-300 focus:outline-hidden sm:text-xl pl-8 pr-2 sm:pl-9 sm:pr-3"
+                className="font-arabic w-full bg-transparent text-center text-sm font-bold text-neutral-800 placeholder:text-neutral-300 focus:outline-hidden sm:text-xl pl-7 pr-1.5 sm:pl-9 sm:pr-3"
                 maxLength={2400}
               />
             )}
@@ -379,11 +383,11 @@ export function VocabularyReviewDialog({
               }}
               aria-label={`Play pronunciation for ${entry.english || entry.arabic}`}
               className={cn(
-                "absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2 z-10 flex size-7 sm:size-8 items-center justify-center rounded-lg sm:rounded-xl text-sky-500 transition hover:bg-sky-50 hover:text-sky-600 active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sky-400",
+                "absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 z-10 flex size-6 sm:size-8 items-center justify-center rounded-lg sm:rounded-xl text-sky-500 transition hover:bg-sky-50 hover:text-sky-600 active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-sky-400",
                 speakingId === entry.id && "animate-pulse text-sky-600 bg-sky-100/70",
               )}
             >
-              <Volume2 className="size-4 sm:size-4.5 stroke-[2.25]" aria-hidden="true" />
+              <Volume2 className="size-3.5 sm:size-4.5 stroke-[2.25]" aria-hidden="true" />
             </button>
           </div>
 
@@ -392,7 +396,7 @@ export function VocabularyReviewDialog({
             type="button"
             size="icon"
             variant="ghost"
-            className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 rounded-xl text-slate-300 transition hover:bg-rose-50 hover:text-rose-500"
+            className="h-8 w-8 sm:h-10 sm:w-10 shrink-0 rounded-xl text-slate-300 transition hover:bg-rose-50 hover:text-rose-500"
             disabled={isSaving}
             onClick={() => removeEntry(entry.id)}
             aria-label={`Remove ${entry.kind} ${index + 1}`}
@@ -535,13 +539,15 @@ export function VocabularyReviewDialog({
                 Check each English word with its Arabic translation before adding.
               </DialogDescription>
             </div>
-            <div className="w-full sm:w-56 shrink-0 pt-0.5">
-              <CategoryCombobox
-                value={category}
-                onValueChange={setCategory}
-                existingCategories={allExistingCategories}
+            <div className="w-full sm:w-72 shrink-0 pt-0.5">
+              <WordTagsInput
+                tags={tags}
+                onTagsChange={setTags}
+                existingSuggestions={allExistingCategories}
                 disabled={isSaving}
-                placeholder="Category (e.g. Chapter 1)"
+                placeholder="Add categories or tags..."
+                maxTags={5}
+                label=""
               />
             </div>
           </div>

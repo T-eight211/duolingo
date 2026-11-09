@@ -5,6 +5,7 @@ import {
   vocabularyKey,
   type VocabularyEntry,
 } from "@/lib/vocabulary/schema";
+import { cleanEnglishTranslation } from "@/lib/vocabulary/clean-translation";
 
 export const vocabularyStorageKey = (entry: VocabularyEntry) =>
   createHash("sha256").update(vocabularyKey(entry)).digest("hex");
@@ -31,10 +32,16 @@ export function prepareVocabularySave(entries: VocabularyEntry[]) {
   }
 
   return {
-    entries: uniqueEntries.map((entry) => ({
-      ...entry,
-      normalizedKey: vocabularyStorageKey(entry),
-    })),
+    entries: uniqueEntries.map((entry) => {
+      const clean = cleanEnglishTranslation(entry.english);
+      return {
+        ...entry,
+        english: clean || entry.english,
+        originalEnglish:
+          entry.originalEnglish || (clean !== entry.english ? entry.english : null),
+        normalizedKey: vocabularyStorageKey(entry),
+      };
+    }),
     links: [...links.values()],
   };
 }

@@ -17,6 +17,7 @@ import {
   stripArabicDiacritics,
   type ExtractionResult,
 } from "./schema";
+import { cleanEnglishTranslation, hasEnglishMetadataAnnotation } from "./clean-translation";
 import type { VocabularyUpload } from "./upload";
 import { vocabularyImageParts } from "./image-parts";
 
@@ -85,6 +86,17 @@ CRITICAL RULES FOR PHRASES, COMPOUND EXPRESSIONS & NOT SEPARATING WORDS LITERALL
   - English translations do NOT need to be strictly forced into a single word. If a natural, accurate translation requires 2 or 3 words (e.g. "don't eat", "I do not have", "look after", "in fact", "wake up"), that is completely acceptable and preferred.
   - Generally keep translations concise (typically 1 to 3 words).
   - NEVER generate full explanatory sentences, lengthy paragraphs, or multiple comma-separated dictionary definitions for a single entry. Keep translations clean, direct, and pedagogical.
+  - CRITICAL RULE: STRIP GENDER, NUMBER, GRAMMAR & NON-TRANSLATION CONTEXT FROM ENGLISH TRANSLATIONS:
+    - Never include gender markers like (m), (f), (m/f), (masc), (fem), [m], [f] in the english translation. E.g. output "first", NEVER "first (m)"; output "Turkish", NEVER "Turkish (m)"; output "firsts", NEVER "firsts (m)"; output "student", NEVER "student (m/f)".
+    - Never include number tags like (pl), (pl.), (sing), (sing.), (dual) in the english translation. E.g. output "books", NEVER "books (pl.)"; output "book", NEVER "book (sing.)".
+    - Never include part-of-speech tags or tense tags like (v), (n), (adj), (past), (present), (command), (masdar), or trailing dashes like "- verb", "- past". E.g. output "to speak", NEVER "to speak - verb".
+    - Never include commentary in brackets or parentheses like "(lit. peace)", "(meaning ...)", "(formal)", "(informal)" in the english translation.
+    - If the textbook wrote repeated gender forms separated by slashes like "Turkish (m) / Turkish (f)", output simply "Turkish".
+    - CONSISTENT FORMAT FOR MULTIPLE TRANSLATIONS (ALWAYS USE " / "):
+      - When an Arabic word has multiple English synonyms or valid meanings (e.g. "read" and "recite", or "colleague" and "classmate", or "big" and "large"), ALWAYS separate them with a spaced slash: " / ".
+      - NEVER use commas (",") or semicolons (";") to separate alternative translations. Output "colleague / classmate", NEVER "colleague, classmate"; output "read / recite", NEVER "read, recite".
+      - Even if the uploaded document used commas or semicolons in the source text, standardize the representation in 'english' to use " / " for consistency across all vocabulary entries.
+    - ALWAYS USE (m), (f), (pl), (sing) cues from the document to accurately inform grammatical analysis (gender, number, and part of speech), but keep the 'english' string strictly clean for learning and exercises.
 
 CRITICAL RULE: PRESERVE SOURCE DIACRITICS, INCLUDING WORD ENDINGS:
 - Transcribe every clearly visible vowel mark in originalArabic exactly as written, including marks on the LAST letter of every word. This applies to standalone words, every verb-table cell, phrases, and sentences.
@@ -120,13 +132,7 @@ type ExtractionOptions = {
 };
 
 export function cleanTenseBrackets(text: string): string {
-  return text
-    .replace(
-      /\s*[\(\[](?:past|present|command|imperative|masdar|verbal\s+noun)[\)\]]/gi,
-      "",
-    )
-    .replace(/[!]+$/g, "")
-    .trim();
+  return cleanEnglishTranslation(text);
 }
 
 function configuredModel(): LanguageModel {
@@ -167,7 +173,7 @@ export async function extractVocabulary(
           content: [
             {
               type: "text",
-              text: "Read the ENTIRE page, all rows and all side-by-side table blocks. For noun tables, include every written singular and plural as separate entries, using singular/plural English translations. Do not stop after the first few rows. Extract all Arabic-English learning material from this upload for review. STRICT REQUIREMENT: The upload MUST contain Arabic text or Arabic study notes. If no Arabic text is found in the upload (e.g. it is a random English paragraph, essay, receipt, or non-Arabic content), DO NOT attempt to translate it into Arabic; return an empty entries list (entries: []) with the warning 'No Arabic text detected. Please upload an image of your Arabic notes, textbook page, or vocabulary list.' PRIORITY RULE: The Arabic text in the document is the primary source of truth — NEVER replace or swap an Arabic word with a synonym or different root (e.g. keep 'جزى', do NOT change it to 'عوض'). If an English translation is written in the document and it is one of the possible meanings of the Arabic word, use that provided translation. Only change an English translation if it is completely wrong or unrelated. Do not append exclamation marks (!) to commands or any vocabulary words. Only if the document is actually a verb table or conjugation chart, extract each written form (such as past/الماضي, present/المضارع, imperative/الأمر, or masdar/المصدر) as its own entry. Do not assume that layout, and do not invent forms that are not on the page. For finite verbs (الماضي and المضارع), include the subject pronoun matching the conjugation (e.g. 'he worked', 'he works', 'he compensated'). For commands (الأمر), use direct base verbs without exclamation marks (e.g. 'work', 'compensate'). For verbal nouns (المصدر), use natural nouns/gerunds (e.g. 'working' / 'work', 'compensation'). Do not use bracketed tags like (past) or (present). When extracting from sentences or text, do not mechanically dissect natural multi-word phrases or idioms into isolated words (e.g. keep 'لا تأكل' / 'don't eat', 'ليس عندي' / 'I do not have' together as unified phrases). Keep translations concise (1 to 3 words) without generating full explanatory sentences. Follow the extraction rules and preserve original wording when correcting it.",
+              text: "Read the ENTIRE page, all rows and all side-by-side table blocks. For noun tables, include every written singular and plural as separate entries, using singular/plural English translations. Do not stop after the first few rows. Extract all Arabic-English learning material from this upload for review. STRICT REQUIREMENT: The upload MUST contain Arabic text or Arabic study notes. If no Arabic text is found in the upload (e.g. it is a random English paragraph, essay, receipt, or non-Arabic content), DO NOT attempt to translate it into Arabic; return an empty entries list (entries: []) with the warning 'No Arabic text detected. Please upload an image of your Arabic notes, textbook page, or vocabulary list.' PRIORITY RULE: The Arabic text in the document is the primary source of truth — NEVER replace or swap an Arabic word with a synonym or different root (e.g. keep 'جزى', do NOT change it to 'عوض'). If an English translation is written in the document and it is one of the possible meanings of the Arabic word, use that provided translation. Only change an English translation if it is completely wrong or unrelated. Do not append exclamation marks (!) to commands or any vocabulary words. Only if the document is actually a verb table or conjugation chart, extract each written form (such as past/الماضي, present/المضارع, imperative/الأمر, or masdar/المصدر) as its own entry. Do not assume that layout, and do not invent forms that are not on the page. For finite verbs (الماضي and المضارع), include the subject pronoun matching the conjugation (e.g. 'he worked', 'he works', 'he compensated'). For commands (الأمر), use direct base verbs without exclamation marks (e.g. 'work', 'compensate'). For verbal nouns (المصدر), use natural nouns/gerunds (e.g. 'working' / 'work', 'compensation'). Do not use bracketed tags like (past) or (present). CRITICAL: Strip gender markers like (m), (f), (m/f), number tags like (pl), (sing), part-of-speech labels, commentary, and dashes from English translations (e.g. output 'first', NEVER 'first (m)'; 'Turkish', NEVER 'Turkish (m)'; 'firsts', NEVER 'firsts (m)'). When a word has multiple English meanings, ALWAYS separate them consistently with ' / ' (e.g. 'colleague / classmate', 'read / recite'), NEVER with commas. Use those cues to inform grammar analysis, but keep the English string completely clean. When extracting from sentences or text, do not mechanically dissect natural multi-word phrases or idioms into isolated words (e.g. keep 'لا تأكل' / 'don't eat', 'ليس عندي' / 'I do not have' together as unified phrases). Keep translations concise (1 to 3 words) without generating full explanatory sentences. Follow the extraction rules and preserve original wording when correcting it.",
             },
             ...imageParts,
             ...(recheck ? [{
@@ -214,7 +220,15 @@ export async function extractVocabulary(
     );
     for (const entry of result.entries) {
       if (entry.english) {
-        entry.english = cleanTenseBrackets(entry.english);
+        const rawEnglish = entry.english;
+        const cleaned = cleanEnglishTranslation(rawEnglish);
+        if (cleaned !== rawEnglish) {
+          entry.originalEnglish ||= rawEnglish;
+          entry.english = cleaned;
+          if (!entry.corrections.includes("translation")) {
+            entry.corrections.push("translation");
+          }
+        }
       }
       if (!entry.arabicDiacritized && entry.arabic) {
         entry.arabicDiacritized = entry.arabic;

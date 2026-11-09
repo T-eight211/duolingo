@@ -39,7 +39,7 @@ export const vocabularyEntrySchema = rawExtractionEntrySchema.extend({
   partOfSpeech: z.enum(["noun", "verb", "particle"]).nullable().optional(),
   grammar: z.any().nullable().optional(),
   audioSrc: z.string().nullable().optional(),
-  category: z.string().trim().max(100).nullable().optional(),
+  category: z.string().trim().max(200).nullable().optional(),
   errorCount: z.number().int().nonnegative().optional(),
   correctCount: z.number().int().nonnegative().optional(),
   lastPracticedAt: z.string().nullable().optional(),
@@ -178,7 +178,7 @@ export function deduplicateVocabularyEntries(input: VocabularyEntry[]): {
 
 export const saveVocabularySchema = z
   .object({
-    category: z.string().trim().max(100).nullable().optional(),
+    category: z.string().trim().max(200).nullable().optional(),
     entries: z
       .array(vocabularyEntrySchema)
       .min(1, "Add at least one entry.")

@@ -46,14 +46,14 @@ export function VocabularyUpload({
     const controller = new AbortController();
     requestRef.current = controller;
     setExtracting(true);
-    setProgress(5);
+    setProgress(15);
     setError(null);
     const progressInterval = setInterval(() => {
-      // Estimated progress: allow for long AI scans without racing to the end.
-      // Only a successful response below completes the bar.
+      // Estimated progress: advance briskly and smoothly during AI scans without stalling.
+      // Only a successful response below completes the bar to 100%.
       const elapsedMs = performance.now() - startedAt;
-      setProgress(5 + 90 * (1 - Math.exp(-elapsedMs / 60_000)));
-    }, 200);
+      setProgress(15 + 80 * (1 - Math.exp(-elapsedMs / 11_000)));
+    }, 120);
     const timeout = setTimeout(() => controller.abort("timeout"), 290_000);
     try {
       const form = new FormData();
@@ -201,6 +201,13 @@ export function VocabularyUpload({
             disabled={extracting}
             onClick={handleOpenManual}
           >
+            {extracting && !cropSource && (
+              <span
+                aria-hidden="true"
+                className="absolute inset-y-0 left-0 bg-emerald-500 transition-[width] duration-200 ease-out"
+                style={{ width: `${progress || 15}%` }}
+              />
+            )}
             <span className="relative z-10 flex items-center justify-center gap-2">
               <Plus className="h-5 w-5" aria-hidden="true" />
               {extracting && !cropSource ? "Processing..." : "Add words"}

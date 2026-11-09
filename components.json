@@ -14,5 +14,8 @@
     "components": "@/components",
     "utils": "@/lib/utils"
   },
-  "rtl": true
+  "rtl": true,
+  "registries": {
+    "@reui": "https://reui.io/r/{style}/{name}.json"
+  }
 }
