@@ -9,9 +9,10 @@ type Props = {
   label: string;
   iconSrc: string;
   href: string;
+  onNavigate?: () => void;
 };
 
-export const SideBarItem = ({ href, iconSrc, label }: Props) => {
+export const SideBarItem = ({ href, iconSrc, label, onNavigate }: Props) => {
   const path = usePathname();
   const active = path === href || path.startsWith(`${href}/`);
   return (
@@ -20,7 +21,7 @@ export const SideBarItem = ({ href, iconSrc, label }: Props) => {
       className="h-[52px] justify-start"
       asChild
     >
-      <Link href={href}>
+      <Link href={href} onNavigate={onNavigate}>
         <Image
           src={iconSrc}
           alt={label}

@@ -9,6 +9,7 @@ import { Loader } from "lucide-react";
 
 type Props = {
   className?: string;
+  onNavigate?: () => void;
 };
 
 const SideBarData = [
@@ -19,7 +20,7 @@ const SideBarData = [
   { label: "shop", href: "/shop", iconSrc: "/shop.svg" },
 ];
 
-export const SideBar = ({ className }: Props) => {
+export const SideBar = ({ className, onNavigate }: Props) => {
   return (
     <div
       className={cn(
@@ -28,7 +29,7 @@ export const SideBar = ({ className }: Props) => {
         className,
       )}
     >
-      <Link href="/learn">
+      <Link href="/learn" onNavigate={onNavigate}>
         <div className="flex items-center gap-x-3 pb-7 pl-4 pt-8">
           <Image src="/mascot.svg" alt="Mascot" height={40} width={40} />
           <h1 className="text-2xl font-extrabold tracking-wide text-green-600">
@@ -43,6 +44,7 @@ export const SideBar = ({ className }: Props) => {
             label={item.label}
             href={item.href}
             iconSrc={item.iconSrc}
+            onNavigate={onNavigate}
           />
         ))}
       </div>

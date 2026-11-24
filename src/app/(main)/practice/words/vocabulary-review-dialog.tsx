@@ -564,7 +564,7 @@ export function VocabularyReviewDialog({
         >
 
 
-          <ScrollArea className="h-[50dvh] min-h-0" dir="ltr">
+          <ScrollArea className="h-[50dvh] min-h-0 overflow-hidden" dir="ltr">
             <div className="flex min-w-0 flex-col gap-4 p-3.5 sm:gap-5 sm:p-6 sm:px-8">
               {entries.length > 0 && (
                 <section
@@ -601,15 +601,15 @@ export function VocabularyReviewDialog({
           </ScrollArea>
 
           {/* Footer - Duolingo action bar */}
-          <div className="flex shrink-0 flex-col gap-3 border-t-2 border-slate-100 bg-slate-50/60 p-3.5 sm:px-8 sm:py-5">
+          <div className="flex shrink-0 flex-col gap-3 border-t-2 border-slate-100 bg-slate-50 p-3.5 sm:px-8 sm:py-5">
             {error && (
               <p role="alert" className="text-sm font-semibold text-destructive">
                 {error}
               </p>
             )}
 
-            <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="min-w-0 text-sm font-bold text-neutral-600" aria-live="polite">
+            <div className="flex min-w-0 items-center justify-between gap-3">
+              <p className="min-w-0 flex-1 text-sm font-bold text-neutral-600" aria-live="polite">
                 <span className="text-neutral-800">
                   {newCount} {newCount === 1 ? "word" : "words"}
                 </span>{" "}
@@ -622,16 +622,7 @@ export function VocabularyReviewDialog({
                 )}
               </p>
 
-              <DialogFooter className="w-full min-w-0 flex-row items-center gap-2 sm:w-auto sm:gap-3">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="min-w-0 flex-1 sm:flex-none"
-                  disabled={isSaving}
-                  onClick={() => onOpenChange(false)}
-                >
-                  Close
-                </Button>
+              <DialogFooter className="min-w-0 flex-1 flex-row items-center sm:flex-none">
                 <Button
                   type="submit"
                   variant="secondary"

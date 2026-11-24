@@ -116,7 +116,7 @@ export function EditWordCategory({
           }
         }}
       >
-        <DialogContent className="max-w-md rounded-3xl p-6">
+        <DialogContent className="w-[calc(100%_-_2rem)] max-w-md rounded-3xl p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-neutral-800">
               Edit categories & tags
@@ -133,7 +133,7 @@ export function EditWordCategory({
               onTagsChange={setDraftTags}
               existingSuggestions={categories}
               disabled={saving}
-              placeholder="Type category name (e.g. Lesson 1, Verbs)..."
+              placeholder="Type category name (e.g. Chapter 1, Verbs)..."
               label="Assigned Tags"
               description="Type a name and press Enter or comma. Suggestions will appear as you type."
             />

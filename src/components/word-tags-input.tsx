@@ -285,7 +285,7 @@ export function WordTagsInput({
               removeTag(tags[tags.length - 1]);
             }
           }}
-          className="h-7 min-w-[110px] flex-1 border-0 bg-transparent p-0 text-xs font-semibold text-neutral-800 placeholder:text-slate-400 outline-none focus:outline-none focus:ring-0"
+          className="h-7 min-w-[110px] flex-1 border-0 bg-transparent p-0 text-base md:text-xs font-semibold text-neutral-800 placeholder:text-slate-400 outline-none focus:outline-none focus:ring-0"
         />
 
         {/* Autocomplete Suggestions Dropdown */}
