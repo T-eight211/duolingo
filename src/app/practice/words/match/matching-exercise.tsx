@@ -372,9 +372,9 @@ export function MatchingExercise({
         )}
       >
         {showWave ? (
-          <>
+          <span className="flex w-full min-w-0 max-w-[176px] items-center justify-center gap-3">
             <span
-              className="flex h-10 w-full max-w-[130px] sm:max-w-[140px] items-center justify-between gap-0.5"
+              className="flex h-10 min-w-0 flex-1 max-w-[90px] sm:max-w-[140px] items-center justify-between gap-0.5"
               aria-hidden="true"
             >
               {waveform.map((h, bar) => (
@@ -386,10 +386,10 @@ export function MatchingExercise({
               ))}
             </span>
             <Volume2
-              className="absolute right-3.5 sm:right-4 top-1/2 -translate-y-1/2 h-6 w-6 shrink-0 [transform:scaleX(-1)]"
+              className="h-6 w-6 shrink-0 [transform:scaleX(-1)]"
               aria-hidden="true"
             />
-          </>
+          </span>
         ) : isArabic ? (
           pair.arabic
         ) : (

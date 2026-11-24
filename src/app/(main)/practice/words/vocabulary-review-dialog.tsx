@@ -70,7 +70,7 @@ export function VocabularyReviewDialog({
   );
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
-  const [tags, setTags] = useState<string[]>(["Chapter 1"]);
+  const [tags, setTags] = useState<string[]>([]);
 
   const allExistingCategories = useMemo(() => {
     return Array.from(
