@@ -523,46 +523,13 @@ export function WordList({ entries }: { entries: VocabularyEntry[] }) {
                       />
                     </button>
 
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2.5">
-                        <p
-                          lang="ar"
-                          dir="rtl"
-                          className="w-fit text-2xl leading-relaxed font-bold text-neutral-800"
-                        >
-                          {word.arabicDiacritized || word.arabic}
-                        </p>
-                        <EditWordCategory
-                          wordId={word.id}
-                          english={word.english}
-                          category={word.category}
-                          categories={categories}
-                          onSaved={(category) => {
-                            setLocalOverrides((prev) => ({
-                              ...prev,
-                              [word.id]: { ...prev[word.id], category },
-                            }));
-                            if (
-                              selectedCategory !== "all" &&
-                              category !== selectedCategory
-                            ) {
-                              setSelectedCategory("all");
-                            }
-                            router.refresh();
-                          }}
-                        />
-                        {word.errorCount !== undefined &&
-                          word.errorCount > 0 && (
-                            <span className="inline-flex items-center rounded-lg border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-bold text-rose-700">
-                              {word.errorCount}{" "}
-                              {word.errorCount === 1 ? "error" : "errors"}
-                            </span>
-                          )}
-                      </div>
-                      <p className="mt-0.5 text-base text-muted-foreground">
-                        {word.english}
-                      </p>
-                    </div>
+                    <p
+                      lang="ar"
+                      dir="rtl"
+                      className="min-w-0 break-words text-2xl leading-relaxed font-bold text-neutral-800"
+                    >
+                      {word.arabicDiacritized || word.arabic}
+                    </p>
                   </div>
 
                   {/* Actions */}
@@ -589,8 +556,40 @@ export function WordList({ entries }: { entries: VocabularyEntry[] }) {
                   )}
                 </div>
 
+                <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+                  <EditWordCategory
+                    wordId={word.id}
+                    english={word.english}
+                    category={word.category}
+                    categories={categories}
+                    onSaved={(category) => {
+                      setLocalOverrides((prev) => ({
+                        ...prev,
+                        [word.id]: { ...prev[word.id], category },
+                      }));
+                      if (
+                        selectedCategory !== "all" &&
+                        category !== selectedCategory
+                      ) {
+                        setSelectedCategory("all");
+                      }
+                      router.refresh();
+                    }}
+                  />
+                  {word.errorCount !== undefined &&
+                    word.errorCount > 0 && (
+                      <span className="inline-flex items-center rounded-lg border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-bold text-rose-700">
+                        {word.errorCount}{" "}
+                        {word.errorCount === 1 ? "error" : "errors"}
+                      </span>
+                    )}
+                </div>
+                <p className="min-w-0 break-words text-base text-muted-foreground">
+                  {word.english}
+                </p>
+
                 {word.grammar && (
-                  <div className="min-w-0 ps-12">
+                  <div className="min-w-0">
                     <GrammarBadges
                       grammar={word.grammar}
                       interactive
