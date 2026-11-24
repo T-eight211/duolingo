@@ -309,7 +309,7 @@ export function VocabularyReviewDialog({
                 disabled={isSaving}
                 aria-label={`English translation ${index + 1}`}
                 placeholder="English translation..."
-                className="w-full resize-none bg-transparent text-center text-xs font-bold text-neutral-700 placeholder:text-neutral-300 focus:outline-hidden sm:text-sm"
+                className="w-full resize-none bg-transparent text-center text-base font-bold text-neutral-700 placeholder:text-neutral-300 focus:outline-hidden md:text-sm"
                 rows={2}
                 maxLength={2400}
               />
@@ -324,7 +324,7 @@ export function VocabularyReviewDialog({
                 disabled={isSaving}
                 aria-label={`English word ${index + 1}`}
                 placeholder="English..."
-                className="w-full bg-transparent text-center text-xs font-bold text-neutral-700 placeholder:text-neutral-300 focus:outline-hidden sm:text-base px-1"
+                className="w-full bg-transparent text-center text-base font-bold text-neutral-700 placeholder:text-neutral-300 focus:outline-hidden sm:text-base px-1"
                 maxLength={2400}
               />
             )}
@@ -352,7 +352,7 @@ export function VocabularyReviewDialog({
                 disabled={isSaving}
                 aria-label={`Arabic sentence ${index + 1}`}
                 placeholder="الجملة بالعربية..."
-                className="font-arabic w-full resize-none bg-transparent text-center text-xs font-bold text-neutral-800 placeholder:text-neutral-300 focus:outline-hidden sm:text-base pl-7 pr-1.5 sm:pl-9 sm:pr-3"
+                className="font-arabic w-full resize-none bg-transparent text-center text-base font-bold text-neutral-800 placeholder:text-neutral-300 focus:outline-hidden sm:text-base pl-7 pr-1.5 sm:pl-9 sm:pr-3"
                 rows={2}
                 maxLength={2400}
               />
@@ -369,7 +369,7 @@ export function VocabularyReviewDialog({
                 disabled={isSaving}
                 aria-label={`Arabic word ${index + 1}`}
                 placeholder="الكلمة..."
-                className="font-arabic w-full bg-transparent text-center text-sm font-bold text-neutral-800 placeholder:text-neutral-300 focus:outline-hidden sm:text-xl pl-7 pr-1.5 sm:pl-9 sm:pr-3"
+                className="font-arabic w-full bg-transparent text-center text-base font-bold text-neutral-800 placeholder:text-neutral-300 focus:outline-hidden sm:text-xl pl-7 pr-1.5 sm:pl-9 sm:pr-3"
                 maxLength={2400}
               />
             )}

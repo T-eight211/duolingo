@@ -264,7 +264,7 @@ export function WordList({ entries }: { entries: VocabularyEntry[] }) {
             id="word-sort"
             value={sort}
             onChange={(event) => setSort(event.target.value as SortOption)}
-            className="rounded-xl border-2 border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-neutral-700 hover:border-slate-300 focus-visible:outline-sky-500 cursor-pointer"
+            className="rounded-xl border-2 border-slate-200 bg-white px-2.5 py-1.5 text-base md:text-xs font-bold text-neutral-700 hover:border-slate-300 focus-visible:outline-sky-500 cursor-pointer"
           >
             <option value="recent">Recently added</option>
             <option value="alphabetical">Alphabetical (أ-ي)</option>
@@ -283,7 +283,7 @@ export function WordList({ entries }: { entries: VocabularyEntry[] }) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search in English or Arabic (e.g. merchant, تاجر)..."
-            className="w-full pl-10 pr-10 h-11 rounded-2xl border-2 border-slate-200 bg-white text-sm font-bold text-neutral-800 focus-visible:border-sky-400 focus-visible:ring-2 focus-visible:ring-sky-100 placeholder:text-slate-400 shadow-2xs"
+            className="w-full pl-10 pr-10 h-11 rounded-2xl border-2 border-slate-200 bg-white text-base md:text-sm font-bold text-neutral-800 focus-visible:border-sky-400 focus-visible:ring-2 focus-visible:ring-sky-100 placeholder:text-slate-400 shadow-2xs"
           />
           {searchQuery.trim().length > 0 && (
             <button
