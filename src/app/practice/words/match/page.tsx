@@ -5,13 +5,18 @@ import { arabicCourse } from "@/lib/arabic-course";
 import { getVocabulary } from "@/db/vocabulary";
 import { MatchingExercise } from "./matching-exercise";
 import { createSessionPlan, type WordPair } from "./session-plan";
+import { filterVocabulary, MIN_PRACTICE_WORDS, vocabularyFiltersSchema } from "@/lib/vocabulary/filters";
 
 export const metadata: Metadata = {
   title: "Lingo | Match the words",
   description: "Match Arabic words with their English translations.",
 };
 
-export default async function MatchingPage() {
+export default async function MatchingPage({ searchParams }: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const filters = vocabularyFiltersSchema.safeParse(await searchParams);
+  if (!filters.success) redirect("/practice/words");
   const [userProgress, userSubscription, vocabulary] = await Promise.all([
     getUserProgress(),
     getUserSubscription(),
@@ -21,10 +26,10 @@ export default async function MatchingPage() {
   if (userProgress.activeCourse.title !== arabicCourse.title)
     redirect("/practice");
 
-  const userWords = vocabulary.filter((entry) => entry.kind === "word");
+  const userWords = filterVocabulary(vocabulary, filters.data).filter((entry) => entry.kind === "word");
 
   // In order to play the practice word game, they must add at least 40 words
-  if (userWords.length < 40) {
+  if (userWords.length < MIN_PRACTICE_WORDS) {
     redirect("/practice/words");
   }
 

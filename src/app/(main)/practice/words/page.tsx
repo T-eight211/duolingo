@@ -11,8 +11,6 @@ import { getUserProgress, getUserSubscription } from "@/db/queries";
 import { WordList } from "./word-list";
 import { arabicCourse } from "@/lib/arabic-course";
 import { getVocabulary } from "@/db/vocabulary";
-import { VocabularyUpload } from "./vocabulary-upload";
-import { StartPracticeButton } from "./start-practice-button";
 
 export const metadata: Metadata = {
   title: "Lingo | Words",
@@ -29,7 +27,6 @@ export default async function WordsPage() {
   if (userProgress.activeCourse.title !== arabicCourse.title)
     redirect("/practice");
   const isPro = !!userSubscription?.isActive;
-  const userWords = vocabulary.filter((entry) => entry.kind === "word");
 
   return (
     <div className="flex flex-row-reverse gap-[48px] px-6">
@@ -67,12 +64,7 @@ export default async function WordsPage() {
               </div>
             </div>
           </div>
-          <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
-            <StartPracticeButton wordCount={userWords.length} />
-            <div className="w-full sm:flex-1">
-              <VocabularyUpload existingEntries={vocabulary} />
-            </div>
-          </div>
+
         </header>
         <WordList entries={vocabulary} />
       </FeedWrapper>

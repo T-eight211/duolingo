@@ -30,7 +30,9 @@ import { Spinner } from "@/components/ui/spinner";
 import type { ArabicGrammar } from "@/lib/grammar/types";
 import { cn } from "@/lib/utils";
 import type { VocabularyEntry } from "@/lib/vocabulary/schema";
-import { matchesVocabularySearch } from "@/lib/vocabulary/search";
+import { filterVocabulary, practiceHref } from "@/lib/vocabulary/filters";
+import { StartPracticeButton } from "./start-practice-button";
+import { VocabularyUpload } from "./vocabulary-upload";
 
 type PosFilter = "all" | "noun" | "verb" | "particle";
 type StatusFilter = "all" | "needs-practice" | "mastered" | "unpracticed";
@@ -117,42 +119,17 @@ export function WordList({ entries }: { entries: VocabularyEntry[] }) {
     [vocabulary],
   );
 
-  const filteredWords = useMemo(() => {
-    return vocabulary.filter((word) => {
-      // 1. Search Query: Matches English or Arabic (with or without tashkeel / spelling variants)
-      if (!matchesVocabularySearch(word, searchQuery)) {
-        return false;
-      }
-
-      // 2. Category / Tag Filter
-      if (selectedCategory !== "all") {
-        const wordTags = word.category
-          ? word.category.split(",").map((c) => c.trim().toLowerCase())
-          : [];
-        if (!wordTags.includes(selectedCategory.toLowerCase())) {
-          return false;
-        }
-      }
-
-      // 3. Part of Speech Filter
-      if (selectedPos !== "all" && word.partOfSpeech !== selectedPos) {
-        return false;
-      }
-
-      // 4. Status Filter
-      if (selectedStatus === "needs-practice") {
-        if ((word.errorCount ?? 0) <= 0) return false;
-      } else if (selectedStatus === "mastered") {
-        if ((word.correctCount ?? 0) <= 0 || (word.errorCount ?? 0) > 0)
-          return false;
-      } else if (selectedStatus === "unpracticed") {
-        if ((word.errorCount ?? 0) > 0 || (word.correctCount ?? 0) > 0)
-          return false;
-      }
-
-      return true;
-    });
-  }, [vocabulary, searchQuery, selectedCategory, selectedPos, selectedStatus]);
+  const filters = useMemo(() => ({
+    q: searchQuery,
+    category: selectedCategory,
+    pos: selectedPos,
+    status: selectedStatus,
+  }), [searchQuery, selectedCategory, selectedPos, selectedStatus]);
+  const filteredWords = useMemo(
+    () => filterVocabulary(vocabulary, filters),
+    [vocabulary, filters],
+  );
+  const practiceWordCount = filteredWords.filter((word) => word.kind === "word").length;
 
   const words = useMemo(() => {
     const list = [...filteredWords];
@@ -242,6 +219,13 @@ export function WordList({ entries }: { entries: VocabularyEntry[] }) {
   }
 
   return (
+    <>
+      <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row">
+        <StartPracticeButton wordCount={practiceWordCount} href={practiceHref(filters)} filtered={isFiltered} />
+        <div className="w-full sm:flex-1">
+          <VocabularyUpload existingEntries={vocabulary} />
+        </div>
+      </div>
     <section className="mt-8 border-t-2 pt-6" aria-labelledby="words-heading">
       {/* Header with Counter and Sort Selector */}
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -642,5 +626,6 @@ export function WordList({ entries }: { entries: VocabularyEntry[] }) {
         </ul>
       )}
     </section>
+    </>
   );
 }
